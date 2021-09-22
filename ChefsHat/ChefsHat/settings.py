@@ -160,12 +160,15 @@ STATICFILES_DIRS = (
 
 """Game Constants"""
 
+ICUB_HOST = '127.0.0.1'  # The server's hostname or IP address
+ICUB_PORT = 65432        # The port used by the server
+
 
 
 """Experimental Settings"""
 
 ALLOW_CHEATING_CARD_EXCHANGE = False
 
-ALLOW_AUTOMATIC_SIMULATION = True
+ALLOW_AUTOMATIC_SIMULATION = False
 
-ALLOW_TWO_JOKERS_PLAYER1 = False
+ALLOW_TWO_JOKERS_PLAYER1 = True

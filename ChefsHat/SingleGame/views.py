@@ -18,6 +18,10 @@ import numpy
 
 import random
 
+import socket
+
+import socket
+
 # Create your views here.
 
 def createDB(request):
@@ -104,6 +108,50 @@ def finishGame(request):
 def index(request):
 
     return render(request, 'SingleGame/index.html')
+
+def skipTutorial(request):
+    language = request.session.get('CHLang', False)["lang"]
+    print("Language:" + str(language))
+    translation.activate(language)
+
+    expName = request.session.get('CHGameDirectory', None)["directory"]
+    agentNames = request.session.get('CHGameDirectory', False)["playerNames"]
+    pointsScore = request.session.get('CHGameDirectory', False)["pointsScore"]
+    gameStyle = request.session.get('CHGameDirectory', False)["gameStyle"]
+    avatars = request.session.get('CHGameDirectory', False)["avatars"]
+    playerRole = request.session.get('CHGameDirectory', False)["playerRole"]
+    startingPlayer = request.session.get('CHGameDirectory', False)["startingPlayer"]
+    performanceScore = request.session.get('CHGameDirectory', False)["performanceScore"]
+
+    playerHasARole = False
+    thisPlayerRole = ""
+    currentGame = 0
+
+    humanScore = []
+
+    for a in range(4):
+        humanScore.append("0/9")
+
+
+    session = {"directory": expName, "playerTurn": "", "playerNames": agentNames, "pointsScore": pointsScore,
+               "currentGame": currentGame, "firstAction": "", "currentRound": "",
+               "lastPlayer": "", "gameStyle": gameStyle, "avatars":avatars, "playerRole":playerRole, "simulateNextActions":False,
+               "startingPlayer":startingPlayer, "humanScore":[0,0,0,0],
+               "cardsChef":[], "cardsSousChef":[], "cardsWaiter":[], "cardsDishwasher":[], "receivedCard":[], "receivedFrom": "",
+               "specialActionUsed":False, "trialGame":False, "performanceScore":performanceScore}
+
+    request.session['CHGameDirectory'] = session
+
+    context = {"playerNames": agentNames, "currentGame": int(currentGame), "nextGameGame": int(currentGame) + 1,
+               "humanScore": humanScore, "gameOver":False, "firstRound":True, "playerHasARole":playerHasARole,"thisPlayerRole":thisPlayerRole, "player0Cards":[],
+               "dinnerServed":False,
+               "foodFight": False,
+               "thisPlayerPreviousRole": "",
+               "trialGame": False
+               }
+
+    return render(request, 'SingleGame/startNewGame.html', context)
+
 
 def startGame(request):
 
@@ -250,7 +298,7 @@ def startGame(request):
 
             receivedCardContext = zip(receivedCardsIndex, receivedCard)
 
-            print("New Role" + str(newRoles))
+            # print("New Role" + str(newRoles))
 
             context = {"playerNames": agentNames, "currentGame": int(currentGame), "nextGameGame": int(currentGame) + 1,
                        "humanScore": humanScore, "gameOver":False, "firstRound":False, "playerHasARole": True, "thisPlayerRole": thisPlayerRole, "player0Cards":player0Cards, "phraseRole":phraseRole,
@@ -315,6 +363,10 @@ def startGame(request):
                "avatars":avatars, "hasAvatarRole":hasAvatarRole, "avatarRoles":avatarRoles, "player0CardsLength": player0CardsLength,
                "actionDone": False, "actionSelected":[]}
 
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect((HOST, PORT))
+        s.sendall("START_GAME")
+
     return render(request, 'SingleGame/game.html', context)
 
 def selectAdversaries(request):
@@ -361,7 +413,7 @@ def startNewExperiment(request):
     op3 = "DQL"
     gameStyle = "15Points"
 
-    avatarTypes = ["Avery", "Beck", "Cass"]
+    avatarTypes = ["iCub", "Evan", "Frankie"]
     rangePosition = list(range(3))
     random.shuffle(rangePosition)
 
@@ -483,7 +535,7 @@ def doAction(request):
 
 
     if simulateNextActions:
-        score, finishedRound = simulateActions(expModel, nextPlayer, firstAction, currentRound, agentNames, finishedRound)
+        score, finishedRound = simulateActions(expModel, nextPlayer, firstAction, currentRound, agentNames, finishedRound, pointsScore)
         gameFinished = True
 
     simulateNextActions = False
@@ -544,9 +596,9 @@ def doAction(request):
             # print ("out of the thread. Waiting the Q.")
             # gameFinished, hasPlayerFinished, nextPlayer, newRound, lastPlayer, pizza, error, score, cardsDiscarded, dataFrame = Q.get()
 
-            gameFinished, hasPlayerFinished, nextPlayer, newRound, lastPlayer, pizza, error, score, cardsDiscarded = doPlayerAction(expModel, player, action, firstAction, currentRound, agentNames, [], isHuman)
+            gameFinished, hasPlayerFinished, nextPlayer, newRound, lastPlayer, pizza, error, score, cardsDiscarded = doPlayerAction(expModel, player, action, firstAction, currentRound, agentNames, [], isHuman, pointsScore)
             simulateNextActions = False
-            print ("action finished!")
+            # print ("action finished!")
 
             if hasPlayerFinished and player == 0:
                 simulateNextActions = True
@@ -578,11 +630,11 @@ def doAction(request):
 
         if not trialGame:
             playerRoles = [0, 0, 0, 0]
-            print ("score:" + str(score))
+            # print ("score:" + str(score))
             for playerIndex in range(4):
                 points = 3 - score.index(playerIndex)
                 pointsScore[playerIndex] += points
-                print ("Player:" + str(playerIndex) + " - should be score:" + str(score.index(playerIndex)))
+                # print ("Player:" + str(playerIndex) + " - should be score:" + str(score.index(playerIndex)))
                 playerRoles[playerIndex] = score.index(playerIndex)
 
         # print ("Final playerRoles:" + str(playerRoles))
@@ -604,15 +656,16 @@ def doAction(request):
                 else:
                     rnd = finishedRound[playerIndex]
 
-                ps = performanceScore[playerIndex]
+                ps = performanceScore[playerIndex] * int(currentGame)
 
                 ps += float((points * 10) / rnd)  # Change performance score
+                ps = float(ps / int(currentGame + 1))
 
-                if gameOver:
-                    ps = float(ps / int(currentGame+1))
-                print("Points:" + str(points))
-                print("Rounds:" + str(rnd))
-                print("Current ps:" + str(ps))
+                # if gameOver:
+                #     ps = float(ps / int(currentGame+1))
+                # print("Points:" + str(points))
+                # print("Rounds:" + str(rnd))
+                # print("Current ps:" + str(ps))
                 performanceScore[playerIndex] = ps
                 # input("here")
 
@@ -636,12 +689,12 @@ def doAction(request):
         foodFight = False
         if not trialGame:
             # expModel = getExperimentByName(expName)
-            print ("Score:" + str(score))
-            print("Player roles:" + str(playerRoles))
+            # print ("Score:" + str(score))
+            # print("Player roles:" + str(playerRoles))
             cardsChef, cardsSousChef, cardsWaiter, cardsDishwasher, receivedCard, playerDidAction, receivedFrom, hasSpecialCard, specialCard, newRoles = changeRolesOthers(expModel, playerRoles)
             playerHasARole = True
 
-            print ("New roles:" + str(newRoles))
+            # print ("New roles:" + str(newRoles))
 
 
             if hasSpecialCard:
@@ -762,9 +815,9 @@ def doAction(request):
     hasAvatarRole = len(avatarRoles) > 0
 
     # input("here")
-    print ("Last player:" + str(lastPlayer))
-    print ("NExt player:" + str(nextPlayer))
-    print ("Cards Discarded:" + str(cardsDiscarded))
+    # print ("Last player:" + str(lastPlayer))
+    # print ("NExt player:" + str(nextPlayer))
+    # print ("Cards Discarded:" + str(cardsDiscarded))
 
     session = {'directory': expName, "playerTurn":nextPlayer, "playerNames": agentNames, "pointsScore": pointsScore,
                "currentGame": currentGame, "firstAction":firstAction, "currentRound": newRound, "lastPlayer":lastPlayer, "gameStyle": gameStyle,
@@ -781,10 +834,10 @@ def doAction(request):
     if len(cardsDiscarded) == 0:
         actionDone = False
 
-    print ("Discard:" + str(cardsDiscarded))
+    # print ("Discard:" + str(cardsDiscarded))
     discardedCardsList = []
     for a in cardsDiscarded:
-        print ("A"+str(a))
+        # print ("A"+str(a))
         if "pass" in str(a):
             discardedCardsList.append("actionCards/"+"pass.png")
         else:
@@ -804,6 +857,11 @@ def doAction(request):
                "nextPlayerName":agentNames[nextPlayer], "lastPlayerName":agentNames[player],
                "actionDone": actionDone, "actionSelected":discardedCardsList
                }
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect((settings.ICUB_HOST, settings.ICUB_PORT))
+        s.sendall(agentNames[player]+str(pizza))
+
 
     return render(request, 'SingleGame/game.html', context)
 

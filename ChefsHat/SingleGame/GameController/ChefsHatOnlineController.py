@@ -11,17 +11,19 @@ import gc
 from django.conf import settings
 
 import sys
-
 import os
 
 import copy
-
+from shutil import copyfile
 from keras.models import load_model
 
-from SingleGame.KEF.DataSetManager import exportDBToFiles, getRank, saveRank, getexperimentModelDS, getLastEntryDS, startNewExperimentDS, startNewGameDS, dealActionDS, declareSpecialActionDS, exchangeRolesActionDS, doActionActionDS, doActionPizzaReadyDS
+from SingleGame.KEF.DataSetManager import exportDBToFiles, getRank, saveRank, getexperimentModelDS, getLastEntryDS, startNewExperimentDS, startNewGameDS, dealActionDS, declareSpecialActionDS, exchangeRolesActionDS, doActionActionDS, doActionPizzaReadyDS,observeHuman, getMemoryObservations, addCompetitiveness, selfObserve, saveObservation, getSelfObservations, getHumanObservation, getMyCompetitiviness, saveRivalry
 
 import keras.backend as K
 import tensorflow as tf
+
+from SingleGame.Agents.Agent_Embedded import Agent_Embedded
+from SingleGame.Agents.Agent_Embedded_Rivalry import Agent_Embedded_Rivalry
 
 def exportDB():
     savingPath = settings.BASE_DIR + settings.STATIC_URL + "/"
@@ -220,7 +222,7 @@ def validatePlayerAction(actionList, validActions):
     #
     # "CX;QX;JX"
 
-def simulateActions(expModel, player, firstAction, currentRound, agentNames, finishedRounds):
+def simulateActions(expModel, player, firstAction, currentRound, agentNames, finishedRounds, pointsScore):
 
     def loss(y_true, y_pred):
         LOSS_CLIPPING = 0.2  # Only implemented clipping for the surrogate loss, paper said it was best
@@ -240,17 +242,50 @@ def simulateActions(expModel, player, firstAction, currentRound, agentNames, fin
     loadedModels = []
     clear_session()
     for agent in agentNames:
-        if agent == "Avery":
-            # doRandomAction(possibleActions)
-            modelDirectory = settings.BASE_DIR + settings.STATIC_URL+"/trainedModels/actor_DQL.hd5"
-            loadedModels.append(load_model(modelDirectory, custom_objects={'loss': loss}))
+        if agent == "iCub":
+            dataSetDirectory = settings.BASE_DIR + settings.STATIC_URL + expModel.name
+            modelDirectory = dataSetDirectory + "/" + agent + "/"
+
+            if not os.path.exists(modelDirectory):
+                os.makedirs(modelDirectory)
+                copyfile(settings.BASE_DIR + settings.STATIC_URL + "/trainedModels/actor_DQL.hd5",
+                         dataSetDirectory + "/" + agent + ".hd5")
+                modelDirectory = dataSetDirectory + "/" + agent + ".hd5"
+
+            elif len(os.listdir(modelDirectory)) > 1:
+                modelDirectory = dataSetDirectory + "/" + agent + "/Dylan.hd5"
+            else:
+                modelDirectory = dataSetDirectory + "/" + agent + ".hd5"
+
+
+            model =load_model(modelDirectory, custom_objects={'loss': loss})
+            loadedModels.append(model)
             # print("LOADED DQL!", file=sys.stderr)
-        elif agent == "Cass":
-            modelDirectory = settings.BASE_DIR + settings.STATIC_URL+"/trainedModels/actor_PPO.hd5"
-            loadedModels.append(load_model(modelDirectory, custom_objects={'loss': loss}))
+        elif agent == "Evan":
+            dataSetDirectory = settings.BASE_DIR + settings.STATIC_URL + expModel.name
+            modelDirectory = dataSetDirectory + "/" + agent + "/"
+
+            if not os.path.exists(modelDirectory):
+                os.makedirs(modelDirectory)
+                copyfile(settings.BASE_DIR + settings.STATIC_URL + "/trainedModels/actor_DQL.hd5",
+                         dataSetDirectory + "/" + agent + ".hd5")
+                modelDirectory = dataSetDirectory + "/" + agent + ".hd5"
+
+            elif len(os.listdir(modelDirectory)) > 1:
+                modelDirectory = dataSetDirectory + "/" + agent + "/Evan.hd5"
+            else:
+                modelDirectory = dataSetDirectory + "/" + agent + ".hd5"
+
+            model =load_model(modelDirectory, custom_objects={'loss': loss})
+            loadedModels.append(model)
+        elif agent == "Frankie":
+            modelDirectory = settings.BASE_DIR + settings.STATIC_URL+"/trainedModels/actor_DQL.hd5"
+            model =load_model(modelDirectory, custom_objects={'loss': loss})
+            loadedModels.append(model)
 
 
     gameFinished = False
+
 
     while not gameFinished:
         action = numpy.zeros(200)
@@ -262,7 +297,7 @@ def simulateActions(expModel, player, firstAction, currentRound, agentNames, fin
 
         gameFinished, hasPlayerFinished, nextPlayer, newRound, lastPlayer, pizza, error, score, cardsDiscarded = doPlayerAction(
                         expModel, player, action, firstAction, currentRound, agentNames, loadedModels,
-                        False)
+                        False, pointsScore)
 
         if hasPlayerFinished:
             finishedRounds[player] = newRound+1
@@ -636,7 +671,7 @@ def changeRoles(expModel, playerChosenCards, playerRole, allowCheating, cardsChe
 
     return error, False, startingPlayer, False, "", roles , receivedFrom
 
-def doPlayerAction(expModel, player, action, firstAction, currentRound, agentNames, loadedModels, isHuman):
+def doPlayerAction(expModel, player, action, firstAction, currentRound, agentNames, loadedModels, isHuman, pointsScore):
 
     # print ("isHuman:" + str(isHuman))
     # print ("expName, player, action, firstAction, currentRound, agentNames, dataFrame, loadedModels=[], isHuman=True" + str([expName, player, action, firstAction, currentRound, agentNames, dataFrame, loadedModels, isHuman]))
@@ -700,6 +735,14 @@ def doPlayerAction(expModel, player, action, firstAction, currentRound, agentNam
 
     possibleActions, currentHighLevelActions, highLevelActions = getPossibleActions(currentAction, player, firstAction)
 
+    stateVector = []
+    for a in playerHand:
+        stateVector.append(a)
+    for a in board:
+        stateVector.append(a)
+
+    stateVector = numpy.array(stateVector) / 13
+
     if isHuman:
         if player == 0:
           action, error = validatePlayerAction(action, currentHighLevelActions)
@@ -714,17 +757,24 @@ def doPlayerAction(expModel, player, action, firstAction, currentRound, agentNam
         action = numpy.zeros(200)
         action[actionIndex] = 1
 
+        humanOBS = copy.copy(board)
+        humanOBS.append(actionIndex/200)
+        observeHuman(expModel, "iCub",humanOBS, gameNumber, rounds)
     else:
-        stateVector = []
-        for a in playerHand:
-            stateVector.append(a)
-        for a in board:
-            stateVector.append(a)
-
-        stateVector = numpy.array(stateVector) / 13
-
-        action = doAgentAction(possibleActions, stateVector, agentNames[player], loadedModels)
+        # print("State vectorlen:" + str(len(stateVector)))
+        #
+        # print ("State vectorlen:" + str(len(stateVector)))
+        action = doAgentAction(possibleActions, stateVector, agentNames[player], loadedModels, expModel, gameNumber, rounds, pointsScore, player)
         actionIndex = numpy.argmax(action)
+
+        selfOBS =  copy.copy(board)
+        selfOBS.append(actionIndex / 200)
+
+        if (agentNames[player] == "iCub"):
+            selfObserve(expModel, "Dylan", selfOBS, gameNumber, rounds)
+
+
+
         # print("Agent did action:" + str(actionIndex))
         # print (" --- selected action:" + str(actionIndex))
 
@@ -842,9 +892,13 @@ def doPlayerAction(expModel, player, action, firstAction, currentRound, agentNam
 
     # print("if not game finished")
     if not gameFinished:
+        # print ("-------- game not finished -------------")
+        # print ("- Player status: " + str(playerStatus))
         if len(playerStatus) == 4 and len(playerStatus[nextPlayer]) > 0:
                 for np in range(4):
-                    if actionFinish in playerStatus[nextPlayer] == actionFinish or actionPass in playerStatus[nextPlayer]:
+                    # print("-- Next player: " + str(nextPlayer))
+                    # print("-- Player status next player: " + str(playerStatus[nextPlayer]))
+                    if actionFinish in playerStatus[nextPlayer] or actionPass in playerStatus[nextPlayer]:
                         nextPlayer = nextPlayer + 1
                         if nextPlayer == 4:
                             nextPlayer = 0
@@ -883,14 +937,33 @@ def doPlayerAction(expModel, player, action, firstAction, currentRound, agentNam
     # print("Rounds after loading: " + str(currentAction["Round Number"].tolist()[0]), file=sys.stderr)
 
     # print("Exiting Do Action Round:" + str(newRound), file=sys.stderr)
+    #
+    # expModel, player, state, action, reward, next_state, done, possibleActions, newPossibleActions
 
+    newStateVector = []
+    for a in playersHand[player]:
+        newStateVector.append(a)
+    for a in board:
+        newStateVector.append(a)
 
+    newStateVector = numpy.array(newStateVector) / 13
+
+    currentAction = getLastEntryDS(expModel)
+
+    newPossibleActions, _, _ = getPossibleActions(currentAction, player, False)
+
+    saveObservation(expModel, agentNames[player], stateVector, numpy.argmax(action), reward, newStateVector, gameFinished, possibleActions, newPossibleActions)
     if actionIndex == 199:
         cardsDiscarded = ["pass"]
     # print("ENd1!")
     # Q.put([ gameFinished, hasPlayerFinished, nextPlayer, newRound, lastPlayer, pizza, error, score, cardsDiscarded, dataFrameSaved])
     # print("ENd2!")
     return gameFinished, hasPlayerFinished, nextPlayer, newRound, lastPlayer, pizza, error, score, cardsDiscarded
+
+
+
+
+
 
 def doPizza(expModel, currentRound):
 
@@ -1004,7 +1077,17 @@ def discardCards(playerHand, action, highLevelActions):
   return originalCardDiscarded, board, playerHand
 
 
-def doAgentAction(possibleActions, state, agent, loadedModels):
+def getRandomAction(possibleActions):
+    itemindex = numpy.array(numpy.where(numpy.array(possibleActions) == 1))[0].tolist()
+
+    random.shuffle(itemindex)
+    aIndex = itemindex[0]
+    a = numpy.zeros(200)
+    a[aIndex] = 1
+
+    return a
+
+def doAgentAction(possibleActions, state, agent, loadedModels, expModel, match, round, score, myIndex):
 
     def loss(y_true, y_pred):
         LOSS_CLIPPING = 0.2  # Only implemented clipping for the surrogate loss, paper said it was best
@@ -1043,22 +1126,60 @@ def doAgentAction(possibleActions, state, agent, loadedModels):
 
     # return doRandomAction(possibleActions)
 
-
+    trainModel = False
     loadedPosition = 0
-    if agent == "Avery":
+    if agent == "iCub":
         loadedPosition = 0
-        # doRandomAction(possibleActions)
-        modelDirectory = settings.BASE_DIR + settings.STATIC_URL+"/trainedModels/actor_DQL.hd5"
-        # print("LOADED DQL!", file=sys.stderr)
-    elif agent == "Cass":
+        dataSetDirectory = settings.BASE_DIR + settings.STATIC_URL + expModel.name
+        modelDirectory = dataSetDirectory + "/" + agent + "/"
+
+        if not os.path.exists(modelDirectory):
+            os.makedirs(modelDirectory)
+            copyfile(settings.BASE_DIR + settings.STATIC_URL+"/trainedModels/actor_DQL.hd5", dataSetDirectory +"/"+agent+".hd5")
+            modelDirectory = dataSetDirectory +"/"+agent+".hd5"
+
+        elif len(os.listdir(modelDirectory)) > 1:
+            modelDirectory = dataSetDirectory + "/" + agent + "/Dylan.hd5"
+        else:
+            modelDirectory = dataSetDirectory + "/" + agent + ".hd5"
+
+        memory = getMemoryObservations(expModel, agent)
+        trainModel= True
+        saveDirectory = dataSetDirectory + "/" + agent + "/Dylan.hd5"
+
+        # print("Memory:" + str(len(memory)))
+
+    elif agent == "Evan":
         loadedPosition = 1
-        modelDirectory = settings.BASE_DIR + settings.STATIC_URL+"/trainedModels/actor_PPO.hd5"
-        # print("LOADED PPO!", file=sys.stderr)
-    elif agent == "Beck":
-        # print("LOADED RANDOM!", file=sys.stderr)
-        return doRandomAction(possibleActions)
+        dataSetDirectory = settings.BASE_DIR + settings.STATIC_URL + expModel.name
+        modelDirectory = dataSetDirectory + "/" + agent + "/"
+        if not os.path.exists(modelDirectory):
+            os.makedirs(modelDirectory)
+            copyfile(settings.BASE_DIR + settings.STATIC_URL + "/trainedModels/actor_DQL.hd5",
+                     dataSetDirectory + "/" + agent + ".hd5")
+            modelDirectory = dataSetDirectory + "/" + agent + ".hd5"
 
+        elif len(os.listdir(modelDirectory)) > 1:
+            modelDirectory = dataSetDirectory + "/" + agent + "/Evan.hd5"
+        else:
+            modelDirectory = dataSetDirectory + "/" + agent + ".hd5"
 
+        memory = getMemoryObservations(expModel, agent)
+        trainModel = True
+        saveDirectory = dataSetDirectory + "/" + agent + "/Evan.hd5"
+
+        # print("Memory:" + str(len(memory)))
+
+    # print("LOADED PPO!", file=sys.stderr)
+    elif agent == "Frankie":
+        loadedPosition = 2
+        modelDirectory =settings.BASE_DIR + settings.STATIC_URL + "/trainedModels/actor_DQL.hd5"
+        trainModel = False
+        memory = []
+        saveDirectory = ""
+
+    # print ("Agent:" + str(agent))
+    # print ("trainModel:" + str(trainModel))
     """ Original one"""
     # agentName = agent.split("_")[0]
     # if agentName == "DQL":
@@ -1082,56 +1203,57 @@ def doAgentAction(possibleActions, state, agent, loadedModels):
 
     if len(loadedModels) == 0:
         clear_session()
-        actor = load_model(modelDirectory, custom_objects={'loss':loss})
+        model = load_model(modelDirectory, custom_objects={'loss': loss})
     else:
-        actor = loadedModels[loadedPosition]
+        model = loadedModels[loadedPosition]
 
-    stateVector = numpy.expand_dims(numpy.array(state), 0)
+    if agent=="iCub":
+        actor = Agent_Embedded_Rivalry(name=agent)
+    else:
+        actor = Agent_Embedded(name=agent)
 
-    # print(" --- Preparing action:")
+    if agent=="iCub":
+        observationsHuman = getHumanObservation(expModel, agent)
+        selfObservations =getSelfObservations(expModel,agent)
+        myCompetitiviness = getMyCompetitiviness(expModel,agent)
+        # print ("Score:" + str(score))
+        if len(score) == 0:
+            myScore = 0
+            humanScore = 0
+        else:
+            myScore =  score[myIndex]
+            humanScore = score[0]
 
-    possibleActionsVector = numpy.expand_dims(numpy.array(possibleActions), 0)
+        # a = []
+        # rivalry = -1
+        # with actor.timeout(5):
+        a, model, competitiveness, rivalry = actor.getAction(state, possibleActions, model, trainModel, memory, saveDirectory, observationsHuman, selfObservations, myCompetitiviness, myScore, humanScore)
+        addCompetitiveness(expModel, agent, competitiveness, match, round)
+
+        # if len(a) == 0:
+        #     a = getRandomAction(possibleActions)
+
+        if rivalry >-1:
+            saveRivalry(expModel, agent, rivalry, match, round)
 
 
-    a = actor.predict([stateVector, possibleActionsVector])[0]
+    else:
+        # a = []
+        # with actor.timeout(5):
+        a, model = actor.getAction(state, possibleActions, model, trainModel, memory, saveDirectory)
+
+        # if len(a) == 0:
+        #     a = getRandomAction(possibleActions)
+
+
     action = numpy.argmax(a)
-    takenAction= doRandomAction(possibleActions)
-
 
     gc.collect()
-    del actor
-
-    # print (" --- Action:" + str(action))
-    # return takenAction
-
-    # print ("Action:" + str(a))
-    # print("Action Number:" + str(action))
-    # print ("Possible action[action]: " + str(possibleActions[action]))
-    # print("Random Action Number:" + str(numpy.argmax(takenAction)))
-    # print("Possible action[random]: " + str(possibleActions[numpy.argmax(takenAction)]))
-    # print ("-------")
-    # input("Enter for next...")
+    del model
 
     if possibleActions[action] == 0:
-        # print ("return taken action:" + str(takenAction))
-        return takenAction
+        return doRandomAction(possibleActions)
 
-    # print ("Possible Actions:" + str(possibleActions))
-    # print("Avatar:" + str(agent) + " - Action:" + str(action) + " -  Allowed:" + str(possibleActions[action] == 0) + " - Random Action:" + str(numpy.argmax(takenAction)) + " - Random allowed: "+str(possibleActions[numpy.argmax(takenAction)] == 0), file=sys.stderr)
-
-    # if numpy.array(possibleActions).sum() == 1:
-    #     a = numpy.zeros(200)
-    #     a[199]=1
-
-    # import sys
-    # print("---------", file=sys.stderr)
-    # print("Agent:" + str(agent), file=sys.stderr)
-    # print ("possibleActions2:" + str(possibleActionsVector), file=sys.stderr )
-    # print ("stateVector:" + str(stateVector), file=sys.stderr )
-    # print("a:" + str(a), file=sys.stderr)
-    # print("len(a):" + str(len(a)), file=sys.stderr)
-
-    # print("return a:" + str(a))
     return a
 
 def doRandomAction(possibleActions):
@@ -1358,6 +1480,7 @@ def getPossibleActions(currentAction, player, firstAction):
         currentlyAllowedActions = []
         possibleActions = numpy.zeros(200)
         possibleActions[199] = 1
+        possibleActions = possibleActions.tolist()
         currentlyAllowedActions.append("pass")
 
         return possibleActions, currentlyAllowedActions, highLevelActions
