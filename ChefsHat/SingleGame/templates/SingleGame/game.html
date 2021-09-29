@@ -3,33 +3,35 @@
 {% load i18n %}
 
 {% block page_title %}
-    Chef's Hat Card Game
+Chef's Hat Card Game
 {% endblock %}
 
 {% block page_css %}
-    {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static 'css/game.css' %}" />
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/game.css' %}" />
 {% endblock %}
 
 {% block body %}
 {% load static %}
-{% comment %} <pre> {% filter force_escape %} {% debug %} {% endfilter %} </pre> {% endcomment %}
-    <div id="overlay" class="overlay--game overlay hidden"></div>
+{% comment %}
+<pre> {% filter force_escape %} {% debug %} {% endfilter %} </pre> {% endcomment %}
+<div id="overlay" class="overlay overlay--game"></div>
 
-    <div class="wrapper">
+<div id="mainWrapper" class="wrapper">
+    
+    {% comment %} Section to show in portrait mode {% endcomment %}
+    <div id="playersPortrait" class="container container--players container__players--portrait">
         {% comment %} Upper players {% endcomment %}
-        <div class="section section--players section--players--upper">
+        <div class="container section--players section--players--upper">
 
             {% comment %} Left player {% endcomment %}
-            <div id="playerAction" class="container__player container__player--left {% if playerTurn == 0 %} player__turn {% endif  %}">
+            <div class="container__player player__container--clickable container__player--left {% if playerTurn == 0 %} player__turn {% endif  %}">
                 <div class="container__player--name">
-                    <p class="text text--md text--player_name">{{playerNames.0}}</p>
+                    <p class="text text--md text--player_name text--700">{{ playerNames.0 }}</p>
                 </div>
                 <div class="container__player--imgs">
                     <div class="container__player--avatar">
-
                         <img class="img img--player" src="{% static 'images/playerAgent.png' %}" alt="Player agent">
-
                     </div>
                     <div class="container__player--cards">
                         <span class="player--cards_count">{{ player0CardsLength }}</span>
@@ -39,13 +41,35 @@
             </div>
 
             {% comment %} Right players {% endcomment %}
-            <div class="container__player container__player--right {% if playerTurn == 1 %} player__turn {% endif  %}">
+            <div class="container__player container__player--right {% if playerTurn == 3 %} player__turn {% endif  %}">
                 <div class="container__player--name">
-                    <p class="text text--md text--player_name">{{playerNames.1}}</p>
+                    <p class="text text--md text--player_name text--700">{{ playerNames.3 }}</p>
                 </div>
                 <div class="container__player--imgs">
                     <div class="container__player--avatar">
-                        <img class="img img--player" src="{{avatars.1}}" alt="Player 1">
+                        <img class="img img--player" src="{{ avatars.3 }}" alt="Player 3">
+                    </div>
+                    <div class="container__player--cards">
+                        <span class="player--cards_count">{{ player3Cards|length }}</span>
+                        <img class="img img--card" src="{% static 'images/cardBack.png' %}" alt="Player's 3 card">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% comment %} Boards {% endcomment %}
+        <div class="section section--board" style='background: url("../../static/{{ expDirectory }}/currentBoard.png")'></div>
+
+        {% comment %} Under players {% endcomment %}
+        <div class="container section--players section--players--under">
+            {% comment %} Left player {% endcomment %}
+            <div class="container__player container__player--left {% if playerTurn == 1 %} player__turn {% endif  %}">
+                <div class="container__player--name">
+                    <p class="text text--md text--player_name text--700">{{ playerNames.1 }}</p>
+                </div>
+                <div class="container__player--imgs">
+                    <div class="container__player--avatar">
+                        <img class="img img--player" src="{{ avatars.1 }}" alt="Player 1">
 
                     </div>
                     <div class="container__player--cards">
@@ -54,42 +78,15 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        {% comment %} Boards {% endcomment %}
-        <div id="gameBoard" class="section section--board" style='background: url("../../static/{{expDirectory}}/currentBoard.png")'>
-        </div>
-
-        {% comment %} Under players {% endcomment %}
-        <div class="section section--players section--players--under">
-            
-            {% comment %} Left player {% endcomment %}
-            <div class="container__player container__player--left {% if playerTurn == 3 %} player__turn {% endif  %}">
-                <div class="container__player--name">
-                    <p class="text text--md text--player_name">{{playerNames.3}}</p>
-                </div>
-                <div class="container__player--imgs">
-                    <div class="container__player--avatar">
-                        <img class="img img--player" src="{{avatars.3}}" alt="Player 3">
-
-                    </div>
-                    <div class="container__player--cards">
-                        <span class="player--cards_count">{{ player3Cards|length }}</span>
-                        <img class="img img--card" src="{% static 'images/cardBack.png' %}" alt="Player's 3 card">
-                    </div>
-                </div>
-            </div>
-            
             {% comment %} Right players {% endcomment %}
             <div class="container__player container__player--right {% if playerTurn == 2 %} player__turn {% endif  %}">
                 <div class="container__player--name">
-                    <p class="text text--md text--player_name">{{playerNames.2}}</p>
+                    <p class="text text--md text--player_name text--700">{{ playerNames.2 }}</p>
                 </div>
                 <div class="container__player--imgs">
                     <div class="container__player--avatar">
-
-                        <img class="img img--player" src="{{avatars.2}}" alt="Player 2">
-
+                        <img class="img img--player" src="{{ avatars.2 }}" alt="Player 2">
                     </div>
                     <div class="container__player--cards">
                         <span class="player--cards_count">{{ player2Cards|length }}</span>
@@ -98,9 +95,89 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    {% comment %} Section to show in landscape mode {% endcomment %}
+    <div id="playersLandscape" class="container container--players container__players--landscape">
+        {% comment %} Upper players {% endcomment %}
+        <div class="container section--players section--players--left">
+
+            {% comment %} Left player {% endcomment %}
+            <div class="container__player container__player--top player__container--clickable {% if playerTurn == 0 %} player__turn {% endif  %}">
+                <div class="container__player--name">
+                    <p class="text text--md text--player_name text--700">{{ playerNames.0 }}</p>
+                </div>
+                <div class="container__player--imgs">
+                    <div class="container__player--avatar">
+                        <img class="img img--player" src="{% static 'images/playerAgent.png' %}" alt="Player agent">
+                    </div>
+                    <div class="container__player--cards">
+                        <span class="player--cards_count">{{ player0CardsLength }}</span>
+                        <img class="img img--card" src="{% static 'images/cardBack.png' %}" alt="Player's card">
+                    </div>
+                </div>
+            </div>
+
+            {% comment %} Right player {% endcomment %}
+            <div class="container__player container__player--bottom {% if playerTurn == 1 %} player__turn {% endif  %}">
+                <div class="container__player--name">
+                    <p class="text text--md text--player_name text--700">{{ playerNames.1 }}</p>
+                </div>
+                <div class="container__player--imgs">
+                    <div class="container__player--avatar">
+                        <img class="img img--player" src="{{ avatars.1 }}" alt="Player 1">
+
+                    </div>
+                    <div class="container__player--cards">
+                        <span class="player--cards_count">{{ player1Cards|length }}</span>
+                        <img class="img img--card" src="{% static 'images/cardBack.png' %}" alt="Player's 1 card">
+                    </div>
+                </div>
+            </div>      
+        </div>
+
+        {% comment %} Boards {% endcomment %}
+        <div class="section section--board" style='background: url("../../static/{{ expDirectory }}/currentBoard.png")'></div>
+
+        {% comment %} Under players {% endcomment %}
+        <div class="container section--players section--players--right">
+
+            {% comment %} Left players {% endcomment %}
+            <div class="container__player container__player--top {% if playerTurn == 3 %} player__turn {% endif  %}">
+                <div class="container__player--name">
+                    <p class="text text--md text--player_name text--700">{{ playerNames.3 }}</p>
+                </div>
+                <div class="container__player--imgs">
+                    <div class="container__player--avatar">
+                        <img class="img img--player" src="{{ avatars.3 }}" alt="Player 3">
+                    </div>
+                    <div class="container__player--cards">
+                        <span class="player--cards_count">{{ player3Cards|length }}</span>
+                        <img class="img img--card" src="{% static 'images/cardBack.png' %}" alt="Player's 3 card">
+                    </div>
+                </div>
+            </div>
+
+            {% comment %} Right players {% endcomment %}
+            <div class="container__player container__player--bottom {% if playerTurn == 2 %} player__turn {% endif  %}">
+                <div class="container__player--name">
+                    <p class="text text--md text--player_name text--700">{{ playerNames.2 }}</p>
+                </div>
+                <div class="container__player--imgs">
+                    <div class="container__player--avatar">
+                        <img class="img img--player" src="{{ avatars.2 }}" alt="Player 2">
+                    </div>
+                    <div class="container__player--cards">
+                        <span class="player--cards_count">{{ player2Cards|length }}</span>
+                        <img class="img img--card" src="{% static 'images/cardBack.png' %}" alt="Player's 2 card">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     {% comment %} Modal player {% endcomment %}
-    <div id="modalPlayer" class="modal modal--player hidden">
+    <div id="modalPlayer" class="modal modal--player">
         {% comment %} <div class="modal__close--button">
             <div class="button--close modal__player--close">&times;</div>
         </div> {% endcomment %}
@@ -108,34 +185,37 @@
             <form id="form--game-cards" class="form form__player--cards" action="{% url 'SingleGame:doAction'%}" name="PlayerAction" method="post">
                 {% csrf_token %}
                 <div class="container__player--cards">
+                
                     {% for index, card in player0Cards %}
-                        <div class="card">
-                            <input class="form__radio" type="checkbox" value="{{card}}" name="selectedAction" id="cardPlayer{{index}}">
-                            <label class="form__label" for="cardPlayer{{index}}">
-                                <img class="img img--card" src="../../static/images/{{card}}"> 
-                            </label>                   
-                        </div>
+                    <div class="card">
+                        <input class="form__radio" type="checkbox" value="{{ card }}" name="selectedAction" id="cardPlayer{{ index }}" />
+                        <label class="form__label" for="cardPlayer{{ index }}">
+                            <img class="img img--card" src="../../static/images/{{ card }}" />
+                        </label>
+                    </div>
                     {% endfor %}
-                    
+
                     <div class="card card--pass">
                         <input type="checkbox" class="form__radio" value="pass" name="selectedAction" id="gameStyle500">
-                        <label class="form__label" for="gameStyle500"> 
-                            <img class="img img--card img--card--pass" src="{% static 'images/actionCards/pass.png' %}"> 
+                        <label class="form__label" for="gameStyle500">
+                            <img class="img img--card img--card--pass" src="{% static 'images/actionCards/pass.png' %}">
                         </label>
                     </div>
                 </div>
                 <div class="modal__player--cards--form">
                     <input id="playerID" name="playerID" type="hidden" value="0">
-                    <a href="#" onclick="document.getElementById('form--game-cards').submit();" class="form__button text--md button disabled">{% trans 'game_playCards' %}</a>
+                    <button id="modal--player__button" type="submit" class="button form__button text--md disabled" disabled>{% trans 'game_playCards' %}</button>
                 </div>
             </form>
         </div>
-        
+        <div class="modal__footer">
+            <p class="text text--sm text--italic"> {% trans 'startNewGame_pleaseRefer' %} <a href="{% url 'SingleGame:ruleBook' %}" target="_blank">{% trans 'startNewGame_rulebook' %}</a> {% trans 'startNewGame_paraMaisInformacoes' %}</p>
+        </div>
         <div class="modal__player--game_status">
             <div class="game_status game_status--round">
                 <div class="status__round">
-                    <p class="text text--lg title--game_status">{% trans 'startNewGame_Rounds' %} <span class="count game__count">{{currentGame}}</span></p>
-                    <p class="text text--lg title--game_status">{% trans 'game_Turno' %} <span class="count round__count">{{currentRound}}</span></p>
+                    <p class="text text--lg title--game_status">{% trans 'startNewGame_Rounds' %} <span class="count game__count">{{ currentGame }}</span></p>
+                    <p class="text text--lg title--game_status">{% trans 'game_Turno' %} <span class="count round__count">{{ currentRound }}</span></p>
                 </div>
             </div>
             <div class="game_status game_status--score">
@@ -144,59 +224,51 @@
                 </div>
                 <div class="players-score__lists">
                     <div class="score__list">
-                        <p class="text text--md player--name">{{playerNames.0}}: <span class="player--score">{{ pointsScore.0}}</span></p>
-                        <p class="text text--md player--name">{{playerNames.1}}: <span class="player--score">{{ pointsScore.1}}</span></p>
+                        <p class="text text--md player--name">{{ playerNames.0 }}: <span class="player--score">{{ pointsScore.0 }}</span></p>
+                        <p class="text text--md player--name">{{ playerNames.1 }}: <span class="player--score">{{ pointsScore.1 }}</span></p>
                     </div>
                     <div class="score__list">
-                        <p class="text text--md player--name">{{playerNames.2}}: <span class="player--score">{{ pointsScore.2}}</span></p>
-                        <p class="text text--md player--name">{{playerNames.3}}: <span class="player--score">{{ pointsScore.3}}</span></p>
+                        <p class="text text--md player--name">{{ playerNames.2 }}: <span class="player--score">{{ pointsScore.2 }}</span></p>
+                        <p class="text text--md player--name">{{ playerNames.3 }}: <span class="player--score">{{ pointsScore.3 }}</span></p>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="modal__footer">
-                <p class="text text--sm"> {% trans 'startNewGame_pleaseRefer' %} <a href="{% url 'SingleGame:ruleBook' %}" target="_blank">{% trans 'startNewGame_rulebook' %}</a> {% trans 'startNewGame_paraMaisInformacoes' %}</p>
         </div>
     </div>
 
     {% comment %} Modal actionDone {% endcomment %}
-    <div id="modalActionDone" class="modal modal--player hidden">
-         <div class="modal__header">
-                <p class="text text--xxxl title"> {{lastPlayerName}} {% trans 'game_discarded' %}</p>
-            </div>
-
+    <div id="modalActionDone" class="modal modal--action_done modal--padded">
+        <div class="modal__header">
+            <p class="text text--lg text--title">{{lastPlayerName}}{% trans 'game_discarded' %}</p>
+        </div>
         <div class="modal__player--cards">
             <form id="form--game-cards2" class="form form__player--cards" action="{% url 'SingleGame:doAction'%}" name="PlayerAction" method="post">
                 {% csrf_token %}
                 <div class="container__player--cards">
-                   {% for index, card in actionSelected %}
-                        <div class="card">
-                            <input class="form__radio" type="checkbox" value="{{card}}" name="selectedAction" id="cardPlayer{{index}}2">
-                            <label class="form__label" for="cardPlayer{{index}}">
-                               <img class="img img--card" src="../../static/images/{{card}}">
-                            </label>
-                        </div>
+                    {% for index, card in actionSelected %}
+                    <div class="card">
+                        <input class="form__radio" type="checkbox" value="{{ card }}" name="selectedAction" id="cardPlayer{{ index }}2">
+                        <label class="form__label no-opacity" for="cardPlayer{{ index }}">
+                            <img class="img img--card" src="../../static/images/{{ card }}">
+                        </label>
+                    </div>
                     {% endfor %}
-
                 </div>
             </form>
         </div>
-
-
     </div>
 
     {% comment %} Modal pizza {% endcomment %}
-    <div id="modalPizza" class="modal modal--pizza pizza hidden">
+    <div id="modalPizza" class="modal modal--pizza pizza modal--padded">
         <div class="modal__content">
             <div class="modal__header">
-                <p class="text text--xxxl title"> {{nextPlayerName}} {% trans 'game_pizzaReady' %}</p>
+                <p class="text text--xxl text--title"> {{ nextPlayerName }} {% trans 'game_pizzaReady' %}</p>
             </div>
             <div class="modal__body">
                 <form id="formPizza" action="{% url 'SingleGame:doAction'%}" name="pizzaForm" method="post">
                     {% csrf_token %}
                     <p class="text text--lg">{% trans 'game_pizzaCollectingCards' %} </p>
-                    <input id="pizzaID" name="playerID" type="hidden" value="{{playerTurn}}">
+                    <input id="pizzaID" name="playerID" type="hidden" value="{{ playerTurn }}">
                     <input id="pizzaButton" name="pizzaButton" type="hidden" value="pizza">
                 </form>
             </div>
@@ -207,10 +279,10 @@
     </div>
 
     {% comment %} Modal game finished {% endcomment %}
-    <div id="modalAction" class="modal modal--next-action hidden">
+    <div id="modalAction" class="modal modal--next-action modal--padded">
         <div class="modal__content">
             <div class="modal__header">
-                <p class="text text--xxl title">{% trans 'game_finished' %}</p>
+                <p class="text text--xxl text--title">{% trans 'game_finished' %}</p>
             </div>
             <div class="modal__body">
                 <form id="formNextAction" action="{% url 'SingleGame:doAction'%}" name="nextActionForm" method="post">
@@ -224,44 +296,44 @@
             </div>
         </div>
     </div>
-    
+
     {% comment %} Modal error {% endcomment %}
-    <div id="modalError" class="modal modal--error hidden">
+    <div id="modalError" class="modal modal--error modal--padded">
         <div class="modal__content">
             <div class="modal__header">
-                <p class="text text--xxl title error">Oops!</p>
+                <p class="text text--xxl text--title error">Oops!</p>
             </div>
             <div class="modal__body">
-                <p class="text text--lg error">{{ErrorMessage}}</p>
+                <p class="text text--lg text--error">{{ ErrorMessage }}</p>
             </div>
             <div class="modal__footer">
-               <p class="text text--sm"> {% trans 'startNewGame_pleaseRefer' %} <a href="{% url 'SingleGame:ruleBook' %}" target="_blank">{% trans 'startNewGame_rulebook' %}</a> {% trans 'startNewGame_paraMaisInformacoes' %}</p>
+                <p class="text text--sm"> {% trans 'startNewGame_pleaseRefer' %} <a href="{% url 'SingleGame:ruleBook' %}" target="_blank">{% trans 'startNewGame_rulebook' %}</a> {% trans 'startNewGame_paraMaisInformacoes' %}</p>
             </div>
         </div>
     </div>
-    
+
     {% comment %} Modal opponent form {% endcomment %}
-    <div class="hidden">
+    <div style="display: none;">
         <form id="opponentForm" action="{% url 'SingleGame:doAction'%}" name="opponentForm" method="post">
             {% csrf_token %}
-            <input id="oponentID" name="playerID" type="hidden" value="{{playerTurn}}">
+            <input id="oponentID" name="playerID" type="hidden" value="{{ playerTurn }}">
             <input id="sentOponentID" name="sentOponentID" type="hidden" value="False">
         </form>
     </div>
-    
+
 </div>
 {% endblock %}
 
 {% block shared_data %}
-    'PLAYER_TURN': '{{ playerTurn }}',
-    'IS_PIZZA': '{{ isPizza }}',
-    'SIMULATE_NEXT_ACTIONS': '{{ simulateNextActions }}',
-    'OPONENTS_ACTION': '{{ oponentsAction }}',
-    'HAS_ERROR_MESSAGE': '{{ hasErrorMessage }}',
-    'ACTION_DONE': '{{ actionDone }}',
+'PLAYER_TURN': '{{ playerTurn }}',
+'IS_PIZZA': '{{ isPizza }}',
+'SIMULATE_NEXT_ACTIONS': '{{ simulateNextActions }}',
+'OPPONENTS_ACTION': '{{ oponentsAction }}',
+'HAS_ERROR_MESSAGE': '{{ hasErrorMessage }}',
+'ACTION_DONE': '{{ actionDone }}',
 {% endblock %}
 
 {% block page_js %}
-    {% load static %}
-    <script src="{% static 'js/game.js' %}"></script>
+{% load static %}
+<script src="{% static 'js/game.js' %}"></script>
 {% endblock %}

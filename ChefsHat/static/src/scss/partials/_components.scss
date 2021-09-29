@@ -1,13 +1,13 @@
 @charset "UTF-8";
 
 @use 'mixins';
-@use 'variables';
 @use 'media';
 
 @include mixins.keyframes(slideInModal) {
   0% {
     @include mixins.transform(translateY(100%));
   }
+
   100% {
     @include mixins.transform(translateY(0%));
   }
@@ -17,6 +17,7 @@
   0% {
     @include mixins.transform(translateY(0%));
   }
+
   100% {
     @include mixins.transform(translateY(100%));
   }
@@ -24,67 +25,75 @@
 
 @include mixins.keyframes(pulse) {
   0% {
-    transform: scale(0.95);
     box-shadow: 0 0 0 1px var(--game-turn-pulse-color);
     clip-path: ellipse(100% 55%);
   }
 
   70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 15px var(--game-turn-pulse-color);
+    box-shadow: 0 0 0 1em var(--game-turn-pulse-color);
     clip-path: ellipse(100% 85%);
   }
 
   100% {
-    transform: scale(0.95);
     box-shadow: 0 0 0 1px var(--game-turn-pulse-color);
     clip-path: ellipse(100% 55%);
   }
 }
 
 @mixin pulseOnTurn {
-  box-shadow: 0 0 0 var(--game-turn-pulse-color);
-  @include mixins.transform(scale(1));
   @include mixins.animation(pulse, 2s, linear, infinite);
+  box-shadow: 0 0 0 var(--game-turn-pulse-color);
+}
+
+@mixin modalOverlay {
+  .overlay {
+    @include mixins.filter(opacity(0.5));
+    display: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    max-height: 100vh;
+    max-width: 100vw;
+    background-color: black;
+    overflow: hidden;
+    z-index: CALC(var(--modal-global-index) - 1);
+
+    &.active {
+      @include mixins.animation(all, 2s, linear, infinite);
+      display: block;
+    }
+  }
 }
 
 @mixin modal {
   .modal {
-    @include mixins.flexCol(space-between);
+    z-index: var(--modal-global-index);
+    display: none;
     position: absolute;
     bottom: 0;
-    z-index: var(--modal-global-index);
-    height: auto;
-    width: 100%;
-    max-height: 100%;
-    max-width: 70%;
+    max-width: 60%;
     background-color: white;
-    min-height: 15em;
-    
+    border-radius: 1rem;
+
+    &.modal--padded {
+      padding: 1vh 2vw;
+    }
+
+    &.active {
+      @include mixins.flexCol(space-between);
+    }
+
     // Full width until 768px
-    @include media.media('portrait', '<=tablet') {
+    @include media.query("portrait", "<phone") {
       max-height: 80%;
       max-width: 100%;
     }
-    @include media.media('landscape-max-h414') {
-      max-height: 100%;
-      max-width: 80%;
-    }
+
     .modal__content {
       @include mixins.flexCol();
       @include mixins.flex-grow(1);
-
-      .modal__header {
-        .title {
-          color: var(--secondary-color);
-          font-weight: 800;
-        }
-      }
-      .modal__footer {
-        p {
-          font-style: italic;
-        }
-      }
     }
 
     &.modal--opening {
@@ -113,24 +122,27 @@
   height: 100%;
   width: 100%;
 
-  @include media.media('portrait') {
+  @include media.query("portrait") {
     @include mixins.flexRow(center);
     @include mixins.flex(1, 0, 10%);
   }
-  @include media.media('portrait', '<phone') {
+
+  @include media.query("portrait", "<phone") {
     @include mixins.flexRow(center);
     @include mixins.flex(1, 0, 5%);
   }
-  @include media.media('landscape') {
+
+  @include media.query("landscape") {
     @include mixins.flexRow(center);
     @include mixins.flex(1, 0, 12%);
   }
-  @include media.media('landscape-max-h600') {
+
+  @include media.query("landscape-max-h600") {
     display: none;
   }
-  
+
   .game_status {
-    margin: 1%;
+    padding: 1vh 1vw;
 
     &.game_status--round {
       @include mixins.flexCol();
@@ -138,7 +150,7 @@
       @include mixins.align-self(stretch);
       text-align: left;
 
-      @include media.media('<tablet') {
+      @include media.query("<tablet") {
         display: none;
       }
 
@@ -156,6 +168,7 @@
         }
       }
     }
+
     &.game_status--score {
       @include mixins.flexRow();
       @include mixins.flex(1);
@@ -164,7 +177,7 @@
       .players-score__title--score {
         font-weight: 600;
         text-transform: uppercase;
-        margin: 0 2%;
+        padding: 0 2vw;
       }
 
       .players-score__lists {
@@ -187,142 +200,198 @@
   }
 }
 
+@mixin cards {
+  .card {
+    @include mixins.flex(0, 0);
+
+    @include media.query("<=s-phone") {
+      margin: 2vw 0;
+    }
+
+    @include media.query(">s-phone") {
+      margin: 1vw 0;
+    }
+
+    .form__radio {
+      display: none !important;
+
+      &:checked + .form__label {
+        .img--card {
+          opacity: 1;
+        }
+      }
+    }
+
+    .form__label {
+      cursor: pointer;
+
+      &.no-opacity {
+        .img--card {
+          opacity: 1;
+        }
+      }
+
+      .img--card {
+        opacity: 0.5;
+        @include media.query("landscape") {
+          @include media.query(">=1920px") {
+            max-width: 5.5em;
+          }
+
+          @include media.query(">tablet", "<1920px") {
+            max-width: 4.5em;
+          }
+
+          @include media.query("<=tablet") {
+            max-width: 3em;
+          }
+
+          // Hidden footer into modal
+          @include media.query("landscape-max-h600") {
+            max-width: 4em;
+          }
+
+          @include media.query("landscape-max-h414") {
+            max-width: 3.2em;
+          }
+
+          @include media.query("landscape-max-h360") {
+            max-width: 3em;
+          }
+
+          @include media.query("landscape-max-h320") {
+            max-width: 2.8em;
+          }
+        }
+
+        @include media.query("portrait") {
+          // modal full height
+          @include media.query(">l-desktop") {
+            max-width: 5.5em;
+          }
+
+          @include media.query(">desktop", "<=l-desktop") {
+            max-width: 5em;
+          }
+
+          @include media.query(">tablet", "<=desktop") {
+            max-width: 4.5em;
+          }
+
+          @include media.query(">phone", "<=tablet") {
+            max-width: 4em;
+          }
+
+          @include media.query(">m-phone", "<=phone") {
+            max-width: 3.6em;
+          }
+
+          @include media.query(">s-phone", "<=m-phone") {
+            max-width: 3.2em;
+          }
+
+          @include media.query("<=s-phone") {
+            max-width: 3em;
+          }
+        }
+      }
+    }
+  }
+}
+
 @mixin modalPlayer {
   @include modal;
 
   .modal__player--cards {
     @include mixins.flexCol();
-    @include mixins.flex(2, 0, 70%);
+    // @include mixins.flex(2, 0, 70%);
     position: relative;
-    margin: 1%;
+    padding: 1vh 1vw;
     width: 100%;
 
     .form {
       @include mixins.flexCol();
-      @include mixins.flex-grow(1);
       width: 100%;
 
       .container__player--cards {
+        @include cards;
         @include mixins.flexRow(center);
-        @include mixins.flex(2, 0, 80%);
         @include mixins.flex-wrap(wrap);
-        @include selectableItems();
         width: 100%;
-
-        .card {
-          @include mixins.flexbox;
-          @include mixins.flex(0, 0);
-
-          @include media.media('<=s-phone') {
-            margin: 2% 0;
-          }
-          @include media.media('>s-phone') {
-            margin: 1% 0;
-          }
-
-          .form__label {
-            .img--card {
-              @include media.media('landscape') {       
-                @include media.media('>=1920px') {
-                  max-width: 5.5em;
-                }
-                @include media.media('>tablet', '<1920px') {
-                  max-width: 4.5em;
-                }
-                @include media.media('<=tablet') {
-                  max-width: 3em;
-                }
-
-                // Hidden footer into modal
-                @include media.media('landscape-max-h600') {
-                  max-width: 4em;
-                }
-                @include media.media('landscape-max-h414') {
-                  max-width: 3.2em;
-                }
-                @include media.media('landscape-max-h360') {
-                  max-width: 3em;
-                }
-                @include media.media('landscape-max-h320') {
-                  max-width: 2.8em;
-                }
-              }
-
-              @include media.media('portrait') {                
-                // modal full height
-                @include media.media('>l-desktop') {
-                  max-width: 5.5em;
-                }
-                @include media.media('>desktop', '<=l-desktop') {
-                  max-width: 5em;
-                }
-                @include media.media('>tablet', '<=desktop') {
-                  max-width: 4.5em;
-                }
-
-                @include media.media('>phone', '<=tablet') {
-                  max-width: 4em;
-                }
-                @include media.media('>m-phone', '<=phone') {
-                  max-width: 3.6em;
-                }
-                @include media.media('>s-phone', '<=m-phone') {
-                  max-width: 3.2em;
-                }
-                @include media.media('<=s-phone') {
-                  max-width: 3em;
-                }
-              }
-            }
-          }
-        }
       }
+
       .modal__player--cards--form {
-        margin-bottom: 1%;
+        margin-bottom: 1vh;
         @include mixins.flexRow(center);
         @include button;
-
-        @include media.media('landscape-max-h414') {
-          margin-bottom: 2%;
-        }
       }
     }
   }
+
   // Modal's footer
   .modal__player--game_status {
     @include modalPlayerFooter;
   }
 }
 
-@mixin selectableItems {
-  .form__label {
-    cursor: pointer;
-    opacity: 0.5;
-  }
-  .form__radio {
-    display: none !important;
+@mixin modalCardsExchange {
+  @include modal;
 
-    &:checked + .form__label {
-      opacity: 1;
-    }
-  }
-}
-
-@mixin closeModalButton {
-  @include mixins.flexRow(center);
-  cursor: pointer;
-
-  .button--close {
+  #modalCardExchange {
+    z-index: var(--modal-global-index);
+    display: none;
     position: absolute;
-    top: -15px;
-    font-weight: 800;
-    line-height: 1;
-    font-size: 1.4rem;
     background-color: white;
-    border: 2px solid var(--secondary-color);
-    @include mixins.border-radius(100%);
-    width: 30px;
-    height: 30px;
+    bottom: 0;
+    width: 100%;
+    height: auto;
+    max-width: 100vw;
+    max-height: 100vh;
+    border-radius: unset;
+
+    &.active {
+      @include mixins.flexCol(space-evenly);
+    }
+
+    @include media.query("portrait", ">=tablet") {
+      height: auto;
+    }
+
+    @include media.query("landscape", ">=desktop") {
+      max-width: 60%;
+    }
+
+    .modal__body {
+      @include mixins.flexCol(space-evenly);
+      min-height: 60%;
+
+      .modal__player--cards {
+        @include mixins.flexCol(space-evenly);
+        height: 100%;
+        width: 100%;
+        @include cards();
+
+        .form__cards {
+          @include mixins.flexCol(space-evenly);
+          height: 100%;
+          width: 100%;
+
+          .container__cards {
+            @include mixins.flexRow(center);
+            @include mixins.flex-wrap(wrap);
+            width: 100%;
+          }
+
+          .modal__player--cards--form {
+            margin-bottom: 1vh;
+            @include mixins.flexRow(center);
+            @include button;
+          }
+        }
+      }
+
+      @include button();
+    }
   }
 }
 
@@ -331,7 +400,7 @@
     @include mixins.border-radius(var(--border-radius));
     text-align: center;
     color: var(--primary-color);
-    border: 2px solid var(--secondary-color);
+    border: 3px solid var(--secondary-color);
     padding: 0.5rem 0.2rem;
     max-width: 100%;
 
@@ -342,17 +411,19 @@
 
     @include mixins.placeholder {
       color: var(--primary-color);
-    };
+    }
   }
 }
 
 @mixin formButton {
-  .form__submit {
+  .button {
+    @include mixins.appearance(none);
+    @include mixins.border-radius(var(--border-radius));
+    border: unset;
     cursor: pointer;
     text-align: center;
     color: var(--button-text-color);
     background-color: var(--secondary-color);
-    @include mixins.border-radius(var(--border-radius));
     text-transform: uppercase;
     font-weight: 800;
     padding: 0.6rem 1rem;
@@ -365,42 +436,30 @@
   }
 }
 
-@mixin modalOverlay {
-  .overlay {
-    @include mixins.filter(opacity(0.6));
-    display: block;
-    position: fixed;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 100%;
-    background-color: black;
-    overflow: hidden;
-    z-index: CALC(var(--modal-global-index) - 1);
-  }
-}
-
 @mixin button {
   .button {
+    @include mixins.border-radius(var(--border-radius));
     cursor: pointer;
     text-align: center;
     color: var(--button-text-color);
     background-color: var(--secondary-color);
-    @include mixins.border-radius(var(--border-radius));
+    border: 3px solid var(--secondary-color);
     text-transform: uppercase;
+    text-decoration: none;
     font-weight: 600;
-    padding: .6em 1em;
-    font-size: 1em;
+    padding: 0.6em 1em;
+    font-size: 1rem;
+    transition: all 0.6s ease 0s;
 
-    @include media.media('landscape-max-h320') {
-      padding: .4em .8em;
-      font-size: 16px;
+    &:focus,
+    &:focus-visible {
+      outline-width: 0;
     }
 
     &:hover {
       color: var(--secondary-color);
       background-color: var(--button-text-color);
-      box-shadow: 0 0 0 .15em var(--secondary-color);
+      transition: all 0.6s ease 0s;
     }
 
     &.disabled {
@@ -412,6 +471,11 @@
       color: var(--button-text-color);
       background-color: var(--secondary-color);
       box-shadow: unset;
+    }
+
+    @include media.query("landscape-max-h320") {
+      padding: 0.4em 0.8em;
+      font-size: 16px;
     }
   }
 }

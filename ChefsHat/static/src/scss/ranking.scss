@@ -1,29 +1,60 @@
-@use 'partials/variables';
+@use 'partials/mixins';
+@use 'partials/media';
 
-.sortable-table{
-  width:100%;
-  min-width:500px;
-  border-collapse:collapse;
-  font-weight:bold;
-  color:#ffffff;
+html {
+  body {
+    .wrapper {
+      .section--title {
+        @include mixins.flex(1, 3, 8%);
+      }
+      .section--content {
+        @include mixins.flex(5, 0, 50%);
+        max-height: 80%;
+        width: 100%;
 
-  tr{
-    height:50px;
-    background:var(--primary-color);
-    border-bottom:rgba(0,0,0,.05) 1px solid;
+        .container--table {
+          @include mixins.flexRow(center, start);
+          overflow: auto;
+
+          .sortable-table {
+            border-collapse: collapse;
+            font-weight: bold;
+            color: #ffffff;
+
+            .row {
+              background: var(--primary-color);
+              border-bottom: rgba(0, 0, 0, 0.05) 1px solid;
+
+              &.row--header {
+                background: var(--secondary-color);
+                color: #f6f3f7;
+                border: 0px solid;
+              }
+
+              .col {
+                padding: 2vh 2vw;
+                @include media.query("<=m-phone") {
+                  padding: 0.5vh 0.5vw;
+                }
+
+                &.col--name {
+                  @include media.query("<=m-phone") {
+                    display: none;
+                  }
+                }
+                &.col--score {
+                  .container--score {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    max-width: 5rem;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
-
-  td{
-    box-sizing:border-box;
-    padding-left:30px;
-
-  }
-
-.headingTr{
-    height:30px;
-    background:var(--secondary-color);
-    color:#f6f3f7;
-    border:0px solid;
 }
-}
-

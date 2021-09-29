@@ -5,41 +5,33 @@
 html {
   body {
     .wrapper {
-      .form {
-        @include mixins.flexCol(space-evenly);
-
-        .section--intro {
-          .container--iframe--intro {
-            @include mixins.flex(unset);
-          }
+      .section--header {
+        @include media.query("landscape-max-h414") {
+          display: none;
         }
-        .section--game_survey {
+      }
+      .section--content {
+        @include media.query("landscape-max-h414") {
+          margin: 1vh 0;
+        }
+
+        @include mixins.flex(1);
+
+        .container--content {
+          @include mixins.flex(1);
           width: 100%;
 
           .container--iframe {
-            @include mixins.flex(unset);
+            @include mixins.flex(1);
+            // height: 100%;
             width: 100%;
 
-            .iframe--survey {
-              display: flex;
-              flex: 1 0 100%;
+            iframe {
+              min-height: 180px;
               height: 100%;
               width: 100%;
-              min-height: 60vh;
-
-              @include media.media('portrait') {                
-                @include media.media('>=s-phone') {
-                  min-height: 70vh;
-                }
-              }
             }
           }
-          .container--iframe_ref {
-            margin: 1% 0;
-          }
-        }
-        .section--footer {
-          @include components.button;
         }
       }
     }

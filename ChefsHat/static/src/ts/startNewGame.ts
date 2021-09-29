@@ -1,112 +1,108 @@
 document.addEventListener("DOMContentLoaded", () => {
+    const overlayElem = document.getElementById("overlay") as HTMLElement;
+    const modalCardExchange = document.getElementById("modalCardExchange") as HTMLElement;
+    const noCardsExchangeBtn = document.getElementById("noCardsExchangeBtn") as HTMLElement ?? null;
+    const cardsContainer = document.getElementById("clickableCards") as HTMLElement;
+    const cardExchangeBtn = document.getElementById("cardExchangeSubmit") as HTMLElement;
 
-    const overlayElem: HTMLElement = document.getElementById("overlay");
+    const animationDuration = window.getComputedStyle(document.documentElement).getPropertyValue('--animation-global-duration');
+    const animationDurationSeconds = parseFloat(animationDuration.replace(/\D+$/g, '')); //=== Remove s from duration
+    const modalOpeningAnimationClass = "modal--opening";
+    const modalClosingAnimationClass = "modal--closing";
+    const modalAnimationTime: number = animationDurationSeconds * 1000;
 
-    const modalPlayer: HTMLElement = document.getElementById("modalPlayer");
-    const modalPlayerButton: Element = modalPlayer.getElementsByClassName("form__button")[0];
-    const modalOpeningAnimationClass: string = "modal--opening";
-    const modalClosingAnimationClass: string = "modal--closing";
-
-
-    let xTouchDown: number | null = null;
-    let yTouchDown: number | null = null;
-
-    //=== Handle touch start
-    function handleTouchStart(evt: any) {
-        xTouchDown = evt.touches[0].clientX;
-        yTouchDown = evt.touches[0].clientY;
-    };          
-    
-    //=== Handle touch swipe
-    function handleTouchMove(evt: any) {
-        if (!xTouchDown || !yTouchDown)
-            return;
-        
-        const xTouchUp = evt.touches[0].clientX; 
-        const yTouchUp = evt.touches[0].clientY;
-        
-        let xDiff = xTouchDown - xTouchUp;
-        let yDiff = yTouchDown - yTouchUp;
-
-        if (Math.abs(xDiff) > Math.abs(yDiff)) {
-            if (xDiff > 0) {
-                /* left swipe */ 
-            } else {
-                /* right swipe */
-            }
-        } else {
-            if (yDiff > 0) {
-                /* up swipe */ 
-            } else { 
-                /* down swipe */
-                handleModalClosing(modalPlayer);
-            }                                                                 
-        }
-        
-        xTouchDown = null;
-        yTouchDown = null;                                             
+    const SHARED_DATA = {
+        player_has_role: ((window as any)._sharedData.PLAYER_HAS_ROLE as string === 'True') ? true : false,
+        game_over: ((window as any)._sharedData.GAME_OVER as string === 'True') ? true : false,
     };
 
+    const handleModalOpening = (modalElem: HTMLElement): void => {
+        console.info('Opening modal');
 
-    //=== Check if event came from modal
-    function isTargetModal(target: HTMLElement): boolean {
-        let isFromModal = false;
-        let elems: HTMLElement[] = [];
-
-        while (!isFromModal && target.classList.length > 0) {
-            if (target.classList.contains('modal')) {
-                isFromModal = true;
-            }
-
-            elems.unshift(target);
-            target = target.parentNode as HTMLElement;
+        if (!overlayElem.classList.contains('active')) {
+            overlayElem.classList.add('active')
         }
-        return isFromModal;
+
+        if (modalElem.classList.contains(modalClosingAnimationClass)) {
+            modalElem.classList.remove(modalClosingAnimationClass)
+        }
+
+        if (!modalElem.classList.contains(modalOpeningAnimationClass)) {
+            modalElem.classList.add(modalOpeningAnimationClass);
+        }
+        
+        modalElem.classList.add('active');
     }
 
-
-    function handleModalClosing(modalElem: HTMLElement): void {
-        const animationDuration = window.getComputedStyle(document.documentElement).getPropertyValue('--animation-global-duration');
-        const animationDurationSecond = parseFloat(animationDuration.replace(/\D+$/g, '')); //=== Remove s from duration
+    const handleModalClosing = (modalElem: HTMLElement): void => {
+        console.info('Closing modal');
 
         if (modalElem.classList.contains(modalOpeningAnimationClass)) {
-            modalElem.classList.add(modalClosingAnimationClass)
             modalElem.classList.remove(modalOpeningAnimationClass);
         }
+        
+        if (!modalElem.classList.contains(modalClosingAnimationClass)) {
+            modalElem.classList.add(modalClosingAnimationClass)
+        }
 
-        /* Hide after animation end */
+        // Cleanup
         setTimeout(() => {
-            if (!overlayElem.classList.contains('hidden'))
-                overlayElem.classList.add('hidden')
+            modalElem.classList.remove(modalClosingAnimationClass);
+            modalElem.classList.remove('active');
+            overlayElem.classList.remove('active');
+        }, modalAnimationTime);
+    }
 
-            modalElem.classList.add('hidden');
-        }, animationDurationSecond * 1000);
+    const isChecked = (element: HTMLInputElement): boolean => {
+        return element.getElementsByTagName('input')[0].checked;
+    }
+
+    const handleCardsSelection = (): void => {
+        const cardsArray = Array.from(cardsContainer.getElementsByClassName('card'));
+
+        /* Check if almost two ar checked */
+        let cardsCount = 0;
+        for(let card of cardsArray) {
+            if (isChecked(card as HTMLInputElement)) {
+                ++cardsCount;
+            }
+        }
+//         if (cardsCount <= 2) {
+//             cardExchangeBtn.removeAttribute('disabled');
+//             cardExchangeBtn.classList.remove('disabled');
+//         } else {
+//             cardExchangeBtn.setAttribute('disabled', 'disabled');
+//             cardExchangeBtn.classList.add('disabled')
+//         }
     }
 
 
     function handlePlayerModal(event: any): void {
         event.stopPropagation();
-        handleModalClosing(modalPlayer);
-    }
-
-    function handleModalOpening(modalElem: HTMLElement) : void {
-
-       console.info('POpening modal player');
-        modalElem.classList.remove('hidden');
-
-        if (overlayElem.classList.contains('hidden'))
-            overlayElem.classList.remove('hidden')
-
-        if (!modalElem.classList.contains(modalOpeningAnimationClass)) {
-            modalElem.classList.remove(modalClosingAnimationClass)
-            modalElem.classList.add(modalOpeningAnimationClass);
-        }
+        handleModalClosing(modalCardExchange);
     }
 
     //=== Event binding
-    console.info('It should open the model');
-    handleModalOpening(modalPlayer);
-    modalPlayerButton.addEventListener("click",handlePlayerModal);
+    if (!SHARED_DATA.game_over && SHARED_DATA.player_has_role) {
+        console.info('It should open the modal');
 
+        handleModalOpening(modalCardExchange);
 
+        if (cardsContainer) {
+            cardsContainer.addEventListener("click", handleCardsSelection);
+        }
+
+        if (! cardExchangeBtn == null) {
+             cardExchangeBtn.addEventListener("click", handlePlayerModal);
+        }
+    }
+
+//     else {
+//         cardExchangeBtn.classList.remove('disabled');
+//
+//     }
+
+    if (noCardsExchangeBtn) {
+        noCardsExchangeBtn.addEventListener('click', () => handleModalClosing(modalCardExchange))
+    }
 });

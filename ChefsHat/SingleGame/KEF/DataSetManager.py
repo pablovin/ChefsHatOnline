@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
-from ..models import DataSet, Experiment, Rank
+from ..models import DataSet, Experiment, Rank, HumanObservation, AgentCompetitiveness, RivalryAgainstHuman, MemoryObservations, AgentCompetitiveness, HumanObservation, selfObservation, RivalryAgainstHuman
 
 # Action types
 actionDeal = "DEAL"
@@ -36,16 +36,28 @@ def saveRank(nickname, score):
     rank.save()
 
 def getRank():
-
     return Rank.objects.all().order_by("score")
 
 def getAllExperiments():
-
     return Experiment.objects.all()
 
 def getAllDBEntries(experiment):
 
     return DataSet.objects.filter(experiment=experiment).all().order_by("id")
+
+def getMemoryObservations(experiment, player):
+    return list(MemoryObservations.objects.filter(experiment=experiment).filter(player=player).all().order_by("id"))
+
+
+def getHumanObservation(experiment, player):
+    return list(HumanObservation.objects.filter(experiment=experiment).filter(player=player).all().order_by("id"))
+
+def getSelfObservations(experiment, player):
+    return list(selfObservation.objects.filter(experiment=experiment).filter(player=player).all().order_by("id"))
+
+def getMyCompetitiviness(experiment, player):
+    return list(AgentCompetitiveness.objects.filter(experiment=experiment).filter(player=player).all().order_by("id"))
+
 
 def exportDBToFiles(savingPath):
 
@@ -54,7 +66,6 @@ def exportDBToFiles(savingPath):
                "Qvalues", "Loss", "Wrong Actions", "Total Actions",  # Current turn actions
                "Scores", "Roles", "Players Status", "Agent Names", "Performance Score"  # Game status
                ]
-
 
     for experiment in getAllExperiments():
         savingFile = savingPath + experiment.name + ".pkl"
@@ -106,13 +117,17 @@ def startNewExperimentDS(experimentName):
 
 def startNewGameDS(expModel, gameNumber, agentsNames, roles, performanceScore):
 
+    newPScore = []
+
+    for a in performanceScore:
+        newPScore.append(round(float(a),5))
 
     dataset = DataSet(
         experiment=expModel,
         gameNumber = gameNumber,
         roles = roles,
         agentNames = agentsNames,
-        performanceScore = performanceScore,
+        performanceScore = newPScore,
     )
     dataset.save()
 
@@ -156,8 +171,8 @@ def exchangeRolesActionDS(expModel, playersHand, roles, cardsAction,  game):
     # actionCards = cardsAction[1:-1].split(",")
     actionType = actionChangeRole
 
-    print("player hand:" + str(playersHand))
-    print("action cards:" + str(newActionCards))
+    # print("player hand:" + str(playersHand))
+    # print("action cards:" + str(newActionCards))
     # input("here")
 
     dataset = DataSet(
@@ -196,15 +211,15 @@ def doActionActionDS(expModel, game, player, roundNumber, action, board, wrongAc
     # loss = loss.tolist()
     # roles = roles.tolist()
     # playersStatus = playersStatus.tolist()
-    print ("player hand:" + str(playersHand))
-    print ("board:" + str(board))
-    print("roles:" + str(roles))
-    print ("score:"+ str(score))
-    print ("qvalues:" + str(qValue))
-    print ("loss:" + str(loss))
-    print ("Player status:" + str(playersStatus))
-    print ("possible actions:" + str(possibleActions))
-    print("action cards:" + str(actionCards))
+    # print ("player hand:" + str(playersHand))
+    # print ("board:" + str(board))
+    # print("roles:" + str(roles))
+    # print ("score:"+ str(score))
+    # print ("qvalues:" + str(qValue))
+    # print ("loss:" + str(loss))
+    # print ("Player status:" + str(playersStatus))
+    # print ("possible actions:" + str(possibleActions))
+    # print("action cards:" + str(actionCards))
     dataset = DataSet(
         experiment = expModel,
         gameNumber=game,
@@ -231,11 +246,11 @@ def doActionPizzaReadyDS(expModel, roundNumber, board, playersHand, roles, score
 
     actionType = actionPizzaReady
 
-    print ("board:" + str(board))
-    print ("playersHand:"+str(playersHand))
-    print ("roles:" + str(roles))
-    print ("scores:" + str(score))
-    print ("playersStatus:"+str(playersStatus))
+    # print ("board:" + str(board))
+    # print ("playersHand:"+str(playersHand))
+    # print ("roles:" + str(roles))
+    # print ("scores:" + str(score))
+    # print ("playersStatus:"+str(playersStatus))
     dataset = DataSet(
         experiment = expModel,
         actionType=actionType,
@@ -246,5 +261,83 @@ def doActionPizzaReadyDS(expModel, roundNumber, board, playersHand, roles, score
         roles=roles,
         playerStatus=playersStatus,
         gameNumber=game)
+
+    dataset.save()
+
+def saveObservation(expModel, player, state, action, reward, next_state, done, possibleActions, newPossibleActions):
+    # pass
+
+    state = state.tolist()
+    next_state = next_state.tolist()
+    # print ("State:" + str(state))
+    # print ("Next state:" + str(next_state))
+    # print ("Action:" + str(action))
+    # print ("Done:" + str(done))
+    dataset = MemoryObservations(
+    experiment = expModel,
+    player  =  player,
+    state = state,
+    action =  action,
+    reward = reward,
+    next_state = next_state,
+    done = done,
+    possibleActions = possibleActions,
+    new_possibleActions = newPossibleActions
+    )
+
+    dataset.save()
+
+
+def addCompetitiveness(expModel, player, competitiveness, match, round):
+    dataset = AgentCompetitiveness(
+    experiment = expModel,
+    player  =  player,
+    myCompetitiveness = competitiveness,
+    match =  match,
+    round = round
+    )
+
+    dataset.save()
+
+def observeHuman(expModel, player, observationHuman, match, round):
+    # pass
+
+
+    dataset = HumanObservation(
+    experiment = expModel,
+    player  =  player,
+    observationHuman = observationHuman,
+    match =  match,
+    round = round
+    )
+
+    dataset.save()
+
+def selfObserve(expModel, player, observation, match, round):
+    # pass
+
+
+    dataset = selfObservation(
+        experiment=expModel,
+        player=player,
+        observation=observation,
+        match=match,
+        round=round
+    )
+
+    dataset.save()
+
+def saveRivalry(expModel, player, rivalry, match, rounds):
+    # pass
+
+    rivalry = round(rivalry, 4)
+
+    dataset = RivalryAgainstHuman(
+        experiment=expModel,
+        player=player,
+        rivalry=rivalry,
+        match=match,
+        round=rounds
+    )
 
     dataset.save()

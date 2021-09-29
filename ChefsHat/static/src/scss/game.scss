@@ -4,251 +4,264 @@
 
 html {
   body {
-    overflow: hidden;
     @include components.modalOverlay;
+    overflow: hidden;
+    position: relative;
 
     .wrapper {
       @include components.modalPlayer;
       @include mixins.flexCol(space-between);
-      position: relative;
+      width: 100%;
+      height: 100%;
 
-      @include media.media("landscape") {
-        @include mixins.flexRow();
-      }
-      .section--board {
-        @include mixins.background-size(contain !important);
-        @include mixins.flex(1, 0, 50%);
-        background-repeat: no-repeat !important;
-        background-position: center center !important;
-        height: 100%;
-        width: 100%;
-        margin: 0;
-      }
-      .section--players {
-        @include mixins.flexRow(space-between, center);
-
-        @include media.media("portrait") {
-          &:nth-child(1),
-          &:nth-child(3) {
-            height: auto;
-            width: 100%;
-          }
-
-          &:nth-child(1) {
-            margin: 1% 0 1em;
-          }
-          &:nth-child(3) {
-            margin: 1em 0 1%;
-          }
-        }
-        @include media.media("landscape") {
-          @include mixins.flexCol(space-between);
-
-          &:nth-child(1),
-          &:nth-child(3) {
-            height: 100%;
-            width: auto;
-          }
-
-          &:nth-child(1) {
-            margin: 0 0 0 1%;
-          }
-          &:nth-child(3) {
-            margin: 0 1% 0 0;
-          }
-        }
-        &.section--players--upper {
-          @include mixins.align-items(flex-start);
-
+      // Generics for all containers
+      .container--players {
+        .section--players {
           .container__player {
-            @include mixins.flexCol(space-between, center, column);
-
-            .container__player--name {
-              margin-bottom: 0.8em;
+            // Clickable player deck
+            &.player__container--clickable {
+              .container__player--imgs {
+                .container__player--cards {
+                  cursor: pointer;
+                }
+              }
             }
-
-            @include media.media("landscape") {
-              &.container__player--right {
-                @include mixins.flexCol(space-between, flex-start, column-reverse);
-                .container__player--name {
-                  margin-top: 0.8em;
-                  margin-bottom: unset;
-                }
-
-                .container__player--imgs {
-                  .container__player--cards {
-                    .player--cards_count {
-                      right: -0.75em;
-                      left: unset;
-                    }
-                  }
-                }
-
-                @include media.media("landscape") {
-                  .container__player--imgs {
-                    @include mixins.flexRow(center, flex-start row);
-
-                    .container__player--avatar {
-                      margin-right: 0.65em;
-                      margin-left: unset;
-                    }
+            //  Pulse on turn for all
+            &.player__turn {
+              .container__player--imgs {
+                .container__player--cards {
+                  .img--card {
+                    @include components.pulseOnTurn;
                   }
                 }
               }
             }
-          }
-        }
-        &.section--players--under {
-          @include mixins.align-items(flex-end);
-
-          @include media.media("landscape") {
-            @include mixins.align-items(center);
-          }
-
-          .container__player {
-            @include mixins.flexCol(space-between, center, column-reverse);
-
-            .container__player--name {
-              margin-top: 0.8em;
-            }
-
-            @include media.media("landscape") {
-              @include mixins.flexCol(space-between, flex-end, column);
-            }
-
-            @include media.media("landscape") {
-              &.container__player--left {
-                @include mixins.align-items(flex-end);
-
-                .container__player--name {
-                  margin-bottom: 0.8em;
-                  margin-top: unset;
-                }
-
-                .container__player--imgs {
-                  @include mixins.flexRow(space-between, flex-end, row-reverse);
-
-                  .container__player--avatar {
-                    margin-left: 0.65em;
-                    margin-right: unset;
-                  }
-
-                  .container__player--cards {
-                    .player--cards_count {
-                      left: -0.75em;
-                      right: unset;
-                    }
-                  }
-                }
-              }
-              &.container__player--right {
-                @include mixins.flexCol(space-between, flex-end, column-reverse);
-
-                .container__player--imgs {
-                  @include mixins.flexRow(space-between, flex-end, row-reverse);
-
-                  .container__player--avatar {
-                    margin-left: 0.75em;
-                    margin-right: unset;
-                  }
-
-                  .container__player--cards {
-                    .player--cards_count {
-                      right: 0;
-                      left: -0.75em;
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-        .container__player {
-          margin: 0 1%;
-
-          @include media.media(">=phone") {
-            margin: 2%;
-          }
-          &.container__player--left {
-            @include mixins.align-items(flex-start);
 
             .container__player--imgs {
-              @include mixins.flexRow(center, flex-end);
-
-              .container__player--avatar {
-                margin-right: 0.65em;
+              .img {
+                height: auto;
+                width: 100%;
+                max-width: 4rem;
               }
               .container__player--cards {
+                @include components.cards();
+                position: relative;
+
                 .player--cards_count {
-                  top: -0.75em;
-                  right: -0.75em;
+                  @include mixins.border-radius(100%);
+                  @include mixins.flexCol(center, center);
+                  position: absolute;
+                  z-index: 2;
+                  width: 1.8rem;
+                  height: 1.8rem;
+                  border: var(--secondary-color) solid 2px;
+                  background-color: white;
+                  font-weight: 600;
+                  line-height: 1;
                 }
-              }
-            }
-          }
-          &.container__player--right {
-            @include mixins.align-items(flex-end);
-
-            .container__player--imgs {
-              @include mixins.flexRow(center, flex-end, row-reverse);
-
-              .container__player--avatar {
-                margin-left: 0.65em;
-              }
-
-              .container__player--cards {
-                .player--cards_count {
-                  top: -0.75em;
-                  left: -0.75em;
-                }
-              }
-            }
-          }
-          .container__player--name {
-            .text--player_name {
-              font-weight: 800;
-            }
-          }
-          .container__player--imgs {
-            .container__player--avatar {
-              display: flex;
-
-              .img--player {
-                max-width: 3.5em;
-              }
-            }
-            .container__player--cards {
-              display: flex;
-              position: relative;
-
-              .img--card {
-                box-shadow: 2px 2px 3px var(--primary-color);
-                max-width: 3em;
-              }
-
-              .player--cards_count {
-                position: absolute;
-                font-size: 1em;
-                z-index: 2;
-                width: 1.5em;
-                height: 1.5em;
-                border: var(--secondary-color) solid 2px;
-                background-color: white;
-                @include mixins.border-radius(100%);
-                text-align: center;
-                line-height: inherit;
-                vertical-align: middle;
-                font-weight: 800;
-              }
-            }
-          }
-          &.player__turn {
-            .container__player--imgs {
-              .container__player--cards {
                 .img--card {
-                  @include components.pulseOnTurn;
                   border: 0 0 1px 1px solid var(--primary-color);
                   border-radius: 5px;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Players to show in portrait mode
+      .container__players--portrait {
+        display: none;
+        visibility: hidden;
+        width: 100%;
+        height: 100%;
+
+        &.active {
+          visibility: visible;
+          @include mixins.flexCol(space-between);
+          @include mixins.flex(1);
+        }
+
+        .section--board {
+          @include mixins.background-size(contain !important);
+          @include mixins.flex(1, 0, 50%);
+          background-repeat: no-repeat !important;
+          background-position: center center !important;
+          height: 100%;
+          width: 100%;
+          margin: 0;
+          padding: 0;
+        }
+
+        // All players sections
+        .section--players {
+          @include mixins.flexRow(space-between, center);
+          width: 100%;
+          padding: 0 3vw;
+
+          .container__player {
+            &.container__player--left {
+              @include mixins.align-items(flex-start);
+
+              .container__player--name {
+                @include mixins.flexRow(flex-start);
+                width: 100%;
+              }
+
+              .container__player--imgs {
+                @include mixins.flexRow(center, flex-end);
+
+                .container__player--avatar {
+                  margin-right: 1vw;
+                }
+
+                .container__player--cards {
+                  .player--cards_count {
+                    top: -0.8rem;
+                    right: -0.8rem;
+                  }
+                }
+              }
+            }
+            &.container__player--right {
+              @include mixins.align-items(flex-end);
+
+              .container__player--name {
+                @include mixins.flexRow(flex-end);
+                width: 100%;
+              }
+
+              .container__player--imgs {
+                @include mixins.flexRow(center, flex-end, row-reverse);
+
+                .container__player--avatar {
+                  margin-left: 1vw;
+                }
+
+                .container__player--cards {
+                  .player--cards_count {
+                    top: -0.8rem;
+                    left: -0.8rem;
+                  }
+                }
+              }
+            }
+          }
+
+          // Upper section
+          &.section--players--upper {
+            @include mixins.align-items(flex-start);
+            margin-top: 1vh;
+            margin-bottom: 3vh;
+
+            .container__player {
+              @include mixins.flexCol(space-between);
+            }
+          }
+
+          // Under section
+          &.section--players--under {
+            @include mixins.align-items(flex-end);
+            margin-top: 3vh;
+            margin-bottom: 1vh;
+
+            .container__player {
+              @include mixins.flexCol(space-between, center, column-reverse);
+
+              .container__player--name {
+                margin-top: 1vh;
+              }
+            }
+          }
+        }
+      }
+
+      // Players to show in landscape mode
+      .container__players--landscape {
+        visibility: hidden;
+        display: none;
+        width: 100%;
+        height: 100%;
+
+        &.active {
+          visibility: visible;
+          @include mixins.flexRow(space-between);
+          @include mixins.flex(1);
+        }
+
+        .section--board {
+          @include mixins.background-size(contain !important);
+          @include mixins.flex(3, 0, 56%);
+          background-repeat: no-repeat !important;
+          background-position: center center !important;
+          height: 100%;
+          width: 100%;
+          margin: 0;
+          padding: 0;
+        }
+
+        // All players sections
+        .section--players {
+          @include mixins.flexCol(space-between);
+          width: 100%;
+          height: 100%;
+          padding: 0 3vw;
+
+          // General players container
+          .container__player {
+            @include mixins.flexCol(space-between);
+            width: 100%;
+            margin: 1vh 0;
+
+            // Reverse flow for bottom content
+            &.container__player--bottom {
+              @include mixins.flexCol(space-between, center, column-reverse);
+            }
+          }
+
+          // Left section
+          &.section--players--left {
+            @include mixins.align-items(flex-start);
+
+            .container__player {
+              @include mixins.align-items(flex-start);
+
+              .container__player--imgs {
+                @include mixins.flexRow(center, flex-end, row);
+
+                .container__player--avatar {
+                  margin-right: 1vw;
+                }
+
+                .container__player--cards {
+                  .player--cards_count {
+                    top: -0.8rem;
+                    right: -0.8rem;
+                  }
+                }
+              }
+            }
+          }
+
+          // right section
+          &.section--players--right {
+            @include mixins.align-items(flex-end);
+
+            .container__player {
+              @include mixins.align-items(flex-end);
+
+              .container__player--imgs {
+                @include mixins.flexRow(center, flex-end, row-reverse);
+
+                .container__player--avatar {
+                  margin-left: 1vw;
+                }
+
+                .container__player--cards {
+                  .player--cards_count {
+                    top: -0.8rem;
+                    left: -0.8rem;
+                  }
                 }
               }
             }

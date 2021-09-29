@@ -1,17 +1,50 @@
-@use 'partials/_mixins';
+@use 'partials/mixins';
+@use 'partials/media';
 
 html {
   body {
     .wrapper {
+      .section--header,
+      .section--score,
+      .section--form {
+        @include mixins.flex(0, 3, 8%);
+      }
+
       .section--header {
         @include mixins.flexCol(center);
-        @include mixins.flex(1);
 
         .container--img {
-          margin-bottom: 15px;
+          margin-bottom: 1rem;
+          @include media.query("<=desktop") {
+            display: none;
+          }
+        }
+      }
 
-          .img--chef_hat {
-            max-width: 18em;
+      .section--content {
+        @include mixins.flex(4, 0, 60%);
+        width: 100%;
+
+        @include media.query("landscape-max-h414") {
+          display: none;
+        }
+
+        @include media.query("portrait", "<phone") {
+          display: none;
+        }
+
+        .container--iframe {
+          height: 100%;
+          width: 100%;
+          min-height: 180px;
+
+          iframe {
+            height: 100%;
+            width: 100%;
+          }
+
+          @include media.query("<=m-phone") {
+            display: none;
           }
         }
       }

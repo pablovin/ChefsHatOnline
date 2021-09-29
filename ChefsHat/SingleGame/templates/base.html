@@ -10,7 +10,6 @@
     {% block site_css %}
     {% load static %}
     <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/utility/reset.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}" />
     {% endblock %}
 
@@ -22,7 +21,6 @@
 
     <!-- Extra header stuff (scripts, styles, metadata, etc) -->
     {% block extra_head %}
-    {% comment %} <script type="module" src="{% static 'js/base.js' %}"></script>     {% endcomment %}
     {% endblock %}
     <title>{% block page_title %}{% endblock %}</title>
 </head>

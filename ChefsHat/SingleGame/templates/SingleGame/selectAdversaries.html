@@ -13,199 +13,26 @@ Chef's Hat Card Game
 
 {% block body %}
 <div class="wrapper">
-        <div class="section section--header">
-        <div class="container container--title">
-            <p class="text text--xxl text--title"> {% trans 'rules_welcome' %} {{ nickname }}!</p>
+    <section class="section section--header">
+        <div class="container container--header">
+            <p class="text text--xxl text--title">{% trans 'rules_welcome' %} {{ nickname }}!</p>
         </div>
-    </div>
-
-    <form id="formAdversaries" class="form" action="{% url 'SingleGame:showRules'%}" method="post">
-        {% csrf_token %}
-        <div class="section section--intro">
-            <div class="container container--intro">
-                <div class="text text--md">{% trans 'adversaries_AnswerQuestions' %}</div>
-            </div>
-        </div>
-        <div class="section section--game_survey">
+    </section>
+    <section class="section section--content">
+        <div class="container container--content">
             <div class="container container--iframe">
-                <iframe width="640px" height= "480px" src= "https://forms.office.com/Pages/ResponsePage.aspx?id=XkYvv3Ufb0u-Kb9TJzvB2u5KiGG9gI9Jl0u_PdkIVS5URDczUlFQNUg4RTVOSzA1SFZJVFFROTcxRi4u&embed=true" frameborder= "0" marginwidth= "0" marginheight= "0" style= "border: none; max-width:100%; max-height:100vh" allowfullscreen webkitallowfullscreen mozallowfullscreen msallowfullscreen> </iframe>
-            </div>
-            <div class="container container--iframe_ref">
-                <div class="text text--xs"></div>
+                <p class="text text--md text--700">{% trans 'adversaries_AnswerQuestions' %}</p>
+                <iframe src="https://forms.office.com/Pages/ResponsePage.aspx?id=XkYvv3Ufb0u-Kb9TJzvB2u5KiGG9gI9Jl0u_PdkIVS5URDczUlFQNUg4RTVOSzA1SFZJVFFROTcxRi4u&embed=true" frameborder="0" marginwidth="0" marginheight="0" style="border: none;" allowfullscreen webkitallowfullscreen mozallowfullscreen msallowfullscreen></iframe>
             </div>
         </div>
-        <div class="section section--footer">
-            <div class="container container--footer">
-                <a class="form__button text--md button" href="#" onclick="document.getElementById('formAdversaries').submit();">{% trans 'adversaries_Play' %}</a>
-            </div>
+    </section>
+    <section class="section section--form">
+        <div class="container container--form">
+            <form method="post" class="form" action="{% url 'SingleGame:showRules'%}">
+                {% csrf_token %}
+                <button type="submit" class="button form__button text--md">{% trans 'adversaries_Play' %}</button>
+            </form>
         </div>
-    </form>
+    </section>
 </div>
 {% endblock %}
-
-{% block page_js %}
-    {% load static %}
-    <script src="{% static 'js/selectAdversaries.js' %}"></script>
-{% endblock %}
-{% comment %} <div class="wrapper">
-    <form id="formAdversaries" class="form" action="{% url 'SingleGame:startNewExperiment'%}" method="post">
-        {% csrf_token %}
-        <div class="section section--game_style">
-            <div class="container container__title">
-                <p class="text text--lg text--title">Choose a game style:</p>
-            </div>
-            <div class="container container--style--radio">
-                <input class="form__radio" type="radio" value="Single" name="gameStyle" id="gameStyle1" checked="True">
-                <label class="form__label" for="gameStyle1">
-                    <img class="img--card" src="{% static 'images/singleGame.png' %}">
-                </label>
-                <input class="form__radio" type="radio" value="15Points" name="gameStyle" id="gameStyle2">
-                <label class="form__label" for="gameStyle2">
-                    <img class="img--card" src="{% static 'images/15PointsGame.png' %}">
-                </label>
-            </div>
-        </div>
-        <div class="section section--choose_adversaries">
-            <div class="container container__title">
-                <p class="text text--lg text--title">Choose your adversaries:</p>
-            </div>
-            <div class="container container--opponent">
-                <div class="container container__title--opponent">
-                    <p class="text text--md">Oponent 1</p>
-                </div>
-                <div class="container container--radio">
-                    <div class="radio">
-                        <input class="form__radio" type="radio" value="Random" name="oponent1" id="oponent_11"
-                            checked="True">
-                        <label class="form__label" for="oponent_11">
-                            <img class="img img--opponent" src="{% static 'images/randomAgent.png' %}">
-                        </label>
-                        <p class="text text--md agent__name">Random</p>
-                    </div>
-                    <div class="radio">
-                        <input class="form__radio" type="radio" value="DQL" name="oponent1" id="oponent_12">
-                        <label class="form__label" for="oponent_12">
-                            <img class="img img--opponent" src="{% static 'images/DQLAgent.png' %}">
-                        </label>
-                        <p class="text text--md agent__name">DQL</p>
-                    </div>
-                    <div class="radio">
-                        <input class="form__radio" type="radio" value="A2C" name="oponent1" id="oponent_13">
-                        <label class="form__label" for="oponent_13">
-                            <img class="img img--opponent" src="{% static 'images/A2CAgent.png' %}">
-                        </label>
-                        <p class="text text--md agent__name">A2C</p>
-                    </div>
-                    <div class="radio">
-                        <input class="form__radio" type="radio" value="PPO" name="oponent1" id="oponent_14">
-                        <label class="form__label" for="oponent_14">
-                            <img class="img img--opponent" src="{% static 'images/PPOAgent.png' %}">
-                        </label>
-                        <p class="text text--md agent__name">PPO</p>
-                    </div>
-                    <div class="radio">
-                        <input class="form__radio" type="radio" value="DJ" name="oponent1" id="oponent_15">
-                        <label class="form__label" for="oponent_15">
-                            <img class="img img--opponent" src="{% static 'images/DJAgent.png' %}">
-                        </label>
-                        <p class="text text--md agent__name">Lil DJ</p>
-                    </div>
-                </div>
-            </div>
-            <div class="container container--opponent">
-                <div class="container container__title--opponent">
-                    <p class="text text--md">Oponent 2</p>
-                </div>
-                <div class="container container--radio">
-                    <div class="radio">
-                        <input class="form__radio" type="radio" value="Random" name="oponent2" id="oponent_21"
-                            checked="True">
-                        <label class="form__label" for="oponent_21">
-                            <img class="img img--opponent" src="{% static 'images/randomAgent.png' %}">
-                        </label>
-                        <p class="text text--md agent__name">Random</p>
-                    </div>
-                    <div class="radio">
-                        <input class="form__radio" type="radio" value="DQL" name="oponent2" id="oponent_22">
-                        <label class="form__label" for="oponent_22">
-                            <img class="img img--opponent" src="{% static 'images/DQLAgent.png' %}">
-                        </label>
-                        <p class="text text--md agent__name">DQL</p>
-                    </div>
-                    <div class="radio">
-                        <input class="form__radio" type="radio" value="A2C" name="oponent2" id="oponent_23">
-                        <label class="form__label" for="oponent_23">
-                            <img class="img img--opponent" src="{% static 'images/A2CAgent.png' %}">
-                        </label>
-                        <p class="text text--md agent__name">A2C</p>
-                    </div>
-                    <div class="radio">
-                        <input class="form__radio" type="radio" value="PPO" name="oponent2" id="oponent_24">
-                        <label class="form__label" for="oponent_24">
-                            <img class="img img--opponent" src="{% static 'images/PPOAgent.png' %}">
-                        </label>
-                        <p class="text text--md agent__name">PPO</p>
-                    </div>
-                    <div class="radio">
-                        <input class="form__radio" type="radio" value="DJ" name="oponent2" id="oponent_25">
-                        <label class="form__label" for="oponent_25">
-                            <img class="img img--opponent" src="{% static 'images/DJAgent.png' %}">
-                        </label>
-                        <p class="text text--md agent__name">Lil DJ</p>
-                    </div>
-                </div>
-            </div>
-            <div class="container container--opponent">
-                <div class="container__title--opponent">
-                    <p class="text text--md">Oponent 3</p>
-                </div>
-                <div class="container container--radio">
-                    <div class="radio">
-                        <input class="form__radio" type="radio" value="Random" name="oponent3" id="oponent_31"
-                            checked="True">
-                        <label class="form__label" for="oponent_31">
-                            <img class="img img--opponent" src="{% static 'images/randomAgent.png' %}">
-                        </label>
-                        <p class="text text--md agent__name">Random</p>
-                    </div>
-                    <div class="radio">
-                        <input class="form__radio" type="radio" value="DQL" name="oponent3" id="oponent_32">
-                        <label class="form__label" for="oponent_32">
-                            <img class="img img--opponent" src="{% static 'images/DQLAgent.png' %}">
-                        </label>
-                        <p class="text text--md agent__name">DQL</p>
-                    </div>
-                    <div class="radio">
-                        <input class="form__radio" type="radio" value="A2C" name="oponent3" id="oponent_33">
-                        <label class="form__label" for="oponent_33">
-                            <img class="img img--opponent" src="{% static 'images/A2CAgent.png' %}">
-                        </label>
-                        <p class="text text--md agent__name">A2C</p>
-                    </div>
-                    <div class="radio">
-                        <input class="form__radio" type="radio" value="PPO" name="oponent3" id="oponent_34">
-                        <label class="form__label" for="oponent_34">
-                            <img class="img img--opponent" src="{% static 'images/PPOAgent.png' %}">
-                        </label>
-                        <p class="text text--md agent__name">PPO</p>
-                    </div>
-                    <div class="radio">
-                        <input class="form__radio" type="radio" value="DJ" name="oponent3" id="oponent_35">
-                        <label class="form__label" for="oponent_35">
-                            <img class="img img--opponent" src="{% static 'images/DJAgent.png' %}">
-                        </label>
-                        <p class="text text--md agent__name">Lil DJ</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="section section--footer">
-            <div class="container container--form">
-                <a class="form__button text--md button" href="#"
-                    onclick="document.getElementById('formAdversaries').submit();">Play</a>
-            </div>
-        </div>
-    </form>
-</div>
-{% endblock %}
-{% endcomment %}

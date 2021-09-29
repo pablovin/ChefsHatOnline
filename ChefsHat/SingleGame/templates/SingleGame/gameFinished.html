@@ -3,32 +3,37 @@
 {% load i18n %}
 
 {% block page_title %}
-  Chef's Hat Card Game - Single Game
+Chef's Hat Card Game - Single Game
 {% endblock %}
 
 {% block page_css %}
-  {% load static %}
-  <link rel="stylesheet" type="text/css" href="{% static 'css/gameFinished.css' %}" />
-{% endblock %}    
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/gameFinished.css' %}" />
+{% endblock %}
 
 {% block body %}
-  <div class="wrapper">
-      <div class="section section--header">
-          <div class="container container--img">
-              <img class="img img--chef_hat" src="{% static 'images/chefHat.png' %}" alt="Chef's hat" />
-          </div>
-          <div class="container container--title">
-              <p class="text text--xxxl text--title">{% trans 'finished_gameFinished' %}</p>
-
-
-               {% comment %}Translators:         Your total performance Score is:{% endcomment %}
-              <p class="text text--xxxl">{% trans 'finished_finalScore' %} {{ performanceScore }}</p>
-              {% comment %}Translators:        Click here to see the final rank!{% endcomment %}
-              <p class="text text--xll"><a href="{% url 'SingleGame:rank'%}"> {% trans 'finished_rankLink' %}  </a> </p> </br></br>
-              <p class="text text--lg">{% trans 'finished_questionnaire' %}</p>
-
-              <iframe width="640px" height= "480px" src= "https://forms.office.com/Pages/ResponsePage.aspx?id=XkYvv3Ufb0u-Kb9TJzvB2u5KiGG9gI9Jl0u_PdkIVS5UMDlVSEpYME4zOFFYRFcwSFY3SVg4NjhEUy4u&embed=true" frameborder= "0" marginwidth= "0" marginheight= "0" style= "border: none; max-width:100%; max-height:100vh" allowfullscreen webkitallowfullscreen mozallowfullscreen msallowfullscreen> </iframe>
-          </div>
-      </div>
-  </div>
+<div class="wrapper">
+    <section class="section section--header">
+        <div class="container container--img">
+            <img class="img img--chef_hat" src="{% static 'images/chefHat.png' %}" alt="Chef's hat" />
+        </div>
+        <div class="container container--title">
+            <p class="text text--xxxl text--title">{% trans 'finished_gameFinished' %}</p>
+        </div>
+    </section>
+    <section class="section section--score">
+        <div class="container container--score">
+            {% comment %}Translators: Your total performance Score is:{% endcomment %}
+            <p class="text text--md">{% trans 'finished_finalScore' %} {{ performanceScore }}</p>
+            <p class="text text--md"><a target="_blank" href="{% url 'SingleGame:rank'%}">{% trans 'finished_rankLink' %}</a></p>
+        </div>
+    </section>
+    <section class="section section--content">
+        {% comment %}Translators: Click here to see the final rank!{% endcomment %}
+        <div class="container container--iframe">
+            <p class="text text--md">{% trans 'finished_questionnaire' %}</p>
+            <iframe src="https://forms.office.com/Pages/ResponsePage.aspx?id=XkYvv3Ufb0u-Kb9TJzvB2u5KiGG9gI9Jl0u_PdkIVS5UMDlVSEpYME4zOFFYRFcwSFY3SVg4NjhEUy4u&embed=true" frameborder="0" marginwidth="0" marginheight="0" style="border: none; max-width:100%; max-height:100vh" allowfullscreen webkitallowfullscreen mozallowfullscreen msallowfullscreen> </iframe>
+        </div>
+    </section>
+</div>
 {% endblock %}

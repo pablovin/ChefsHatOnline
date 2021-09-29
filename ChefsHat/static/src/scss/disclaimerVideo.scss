@@ -1,0 +1,52 @@
+@use 'partials/components';
+@use 'partials/mixins';
+@use 'partials/media';
+
+html {
+  body {
+    .wrapper {
+      .section--header {
+        @include media.query("landscape-max-h414") {
+          display: none;
+        }
+
+        .container--img {
+          @include mixins.flexRow();
+
+          @include media.query("landscape-max-h600") {
+            display: none;
+          }
+
+          @include media.query("<desktop") {
+            display: none;
+          }
+        }
+      }
+
+      .section--content {
+        @include mixins.flex(1);
+
+        .container--content {
+          iframe {
+            min-height: auto;
+            min-width: auto;
+
+            @include media.query(">=phone") {
+              min-height: 225px;
+              min-width: 400px;
+            }
+
+            @include media.query(">=tablet") {
+              min-height: 281px;
+              min-width: 500px;
+            }
+            @include media.query(">=desktop") {
+              min-height: 337.5px;
+              min-width: 600px;
+            }
+          }
+        }
+      }
+    }
+  }
+}

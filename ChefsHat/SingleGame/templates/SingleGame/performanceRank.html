@@ -1,65 +1,49 @@
-
-<!--{% extends 'base.html' %}-->
+{% extends 'base.html' %}
 
 {% load i18n %}
 
 {% block page_title %}
-  Chef's Hat Card Game - Single Game
+Chef's Hat Card Game - Single Game
 {% endblock %}
 
 {% block page_css %}
-  {% load static %}
-  <link rel="stylesheet" type="text/css" href="{% static 'css/gameFinished.css' %}" />
-  <link rel="stylesheet" href="{% static 'css/ranking.css' %}">
+{% load static %}
+{% comment %} <link rel="stylesheet" type="text/css" href="{% static 'css/gameFinished.css' %}" /> {% endcomment %}
+<link rel="stylesheet" href="{% static 'css/ranking.css' %}">
 {% endblock %}
 
 {% block body %}
-  <div class="wrapper">
-      <div class="section section--header">
-          <div class="container container--title">
-              <p class="text text--xxxl text--title">
-
-                  Performance Score Ranking</p>
-
-              <table class="sortable-table">
-                  <thead>
-                          <tr class="headingTr">
-                              <th>
-                                  Position
-                              </th>
-                              <th>
-                                  Date
-                              </th>
-                              <th>
-                                  Nickname
-                              </th>
-                              <th class="numeric-sort">
-                                  Score
-                              </th>
-                          </tr>
-                     </thead>
-                  <tbody>
-                      {% for score in scores %}
-                      <tr>
-                          <th>
-                              {{ forloop.counter }}
-                          </th>
-                          <th>
-                             {{ score.0 }}
-                          </th>
-                          <th>
-                             {{ score.1 }}
-                          </th>
-                          <th>
-                             {{ score.2 }}
-                          </th>
-                      </tr>
-
-                      {% endfor %}
-                  </tbody>
-              </table>
-
-          </div>
-      </div>
-  </div>
+<div class="wrapper">
+    <section class="section section--title">
+        <div class="container container--title">
+            <p class="text text--xl text--title">Performance Score Ranking</p>
+        </div>
+    </section>
+    <section class="section section--content">
+        <div class="container--table">
+            <table class="sortable-table">
+                <thead class="table--header">
+                    <tr class="row row--header">
+                        <th class="col">Position</th>
+                        <th class="col">Date</th>
+                        <th class="col col--name">Nickname</th>
+                        <th class="col col--score">Score</th>
+                    </tr>
+                </thead>
+                <tbody class="table--body">
+                    {% for score in scores %}
+                    <tr class="row row--body">
+                        <td class="col">{{ forloop.counter }}</td>
+                        <td class="col">{{ score.0 }}</td>
+                        <td class="col col--name">{{ score.1 }}</td>
+                        <td class="col col--score">
+                            <div class="container--score">{{ score.2 }}</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
 {% endblock %}

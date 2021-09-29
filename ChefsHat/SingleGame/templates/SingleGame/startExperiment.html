@@ -3,60 +3,42 @@
 {% load i18n %}
 
 {% block page_title %}
-    Chef's Hat Card Game
+Chef's Hat Card Game
 {% endblock %}
 
 {% block page_css %}
-    {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static 'css/index.css' %}" />
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/startExperiment.css' %}" />
 {% endblock %}
 
 {% block body %}
-
-
-    <div class="wrapper">
-
-        <div class="section section--header">
-            <div class="container container--img">
-
-                <img class="img img--chef_hat" src="{% static 'images/chefHat.png' %}" alt="Chef's hat" />
-            </div>
-            <div class="container container--title">
-                <p class="text text--xxxl text--title">Chef's hat</p>
-            </div>
+<div class="wrapper">
+    <section class="section section--header">
+        <div class="container container--img">
+            <img class="img img--chef_hat" src="{% static 'images/chefHat.png' %}" alt="Chef's hat" />
         </div>
-        <div class="section section--content">
-            <div class="container container--intro">
-                <p class="text text--md">
-
-                    {% trans 'index_Welcome' %}
-
-            </div>
+        <div class="container container--title">
+            <p class="text text--xxxl text--title">Chef's hat</p>
         </div>
-        <div class="section section--form">
-            <div class="container container--form">
-
-                <form id="formIndex" class="form form--index" action="{% url 'SingleGame:selectAdversaries'%}" method="post">
-                    {% csrf_token %}
-                    <input class="form__input text--md" name="userName" type="text" placeholder="{% trans 'index_textNickname' %} ." />
-                    <a class="form__button text--md button" href="#" onclick="document.getElementById('formIndex').submit();">{% trans 'index_startgame' %}</a>
-                </form>
-            </div>
+    </section>
+    <section class="section section--content">
+        <div class="container container--intro">
+            <p class="text text--md">{% trans 'index_Welcome' %}</p>
         </div>
-        <div class="section section--footer">
-            <div class="container container--footer">
-                <p class="text text--sm">
-                    {% trans 'index_NickDisclaimer' %}
-                    </p>
-            </div>
+    </section>
+    <section class="section section--form">
+        <div class="container container--form">
+            <form method="post" class="form form--index" action="{% url 'SingleGame:selectAdversaries'%}">
+                {% csrf_token %}
+                <input class="form__input text--md" name="userName" type="text" placeholder="{% trans 'index_textNickname' %}" />
+                <button type="submit" class="button form__button text--md">{% trans 'index_startgame' %}</button>
+            </form>
         </div>
-    </div>
+    </section>
+    <section class="section section--footer">
+        <div class="container container--footer">
+            <p class="text text--sm">{% trans 'index_NickDisclaimer' %}</p>
+        </div>
+    </section>
+</div>
 {% endblock %}
-{% comment %} {% block shared_data %}
-  {{ block.super }}
-    SUBMIT_URL: "{% url 'SingleGame:showRules' %}"
-{% endblock %} {% endcomment %}
-
-{% comment %} {% block page_js %}
-    <script src="{% static 'js/index.js' %}"></script>
-{% endblock %} {% endcomment %}

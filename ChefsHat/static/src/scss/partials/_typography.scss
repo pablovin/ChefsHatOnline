@@ -3,49 +3,84 @@
 @use 'media';
 
 @mixin default-style {
-    font-size: var(--text-md);
-    font-family: var(--base-font-family);
-    font-style: var(--base-font-style);
-    line-height: var(--line-height);
-    color: var(--primary-color);
-    text-align: center;
+  font-size: 100%;
+  font-family: var(--base-font-family);
+  font-style: var(--base-font-style);
+  color: var(--primary-color);
+  text-align: center;
 
-    a {
-        text-decoration: underline;
-        color: inherit;
-    }
-    .text--xxs {
-        font-size: var(--text-xxs);
-    }
-    .text--xs {
-        font-size: var(--text-xs);
-    }
+  a {
+    color: inherit;
+  }
+
+  @include media.query("portrait") {
     .text--sm {
-        font-size: var(--text-sm);
+      //  scale factor, min size, max size, fallback size
+      @include media.fluid-font(3vw, 12px, 16px, 14px);
     }
+
     .text--md {
-        font-size: var(--text-md);
+      @include media.fluid-font(3vw, 16px, 26px, 18px);
     }
+
     .text--lg {
-        font-size: var(--text-lg);
+      @include media.fluid-font(3vw, 28px, 36px, 30px);
     }
+
     .text--xl {
-        font-size: var(--text-xl);
+      @include media.fluid-font(3vw, 36px, 42px, 38px);
     }
+
     .text--xxl {
-        font-size: var(--text-xxl);
+      @include media.fluid-font(3vw, 44px, 50px, 46px);
     }
+
     .text--xxxl {
-        font-size: var(--text-xxxl);
+      @include media.fluid-font(3vw, 52px, 64px, 58px);
     }
-    .text--title {
-        color: var(--secondary-color);
-        font-weight: 800;
-    }
-    .text--error{
-     color: var(--error-color);
-      }
+  }
 
+  @include media.query("landscape") {
+    .text--sm {
+      //  scale factor, min size, max size, fallback size
+      @include media.fluid-font(3vh, 12px, 16px, 14px);
+    }
+
+    .text--md {
+      @include media.fluid-font(3vh, 16px, 26px, 18px);
+    }
+
+    .text--lg {
+      @include media.fluid-font(3vh, 28px, 34px, 30px);
+    }
+
+    .text--xl {
+      @include media.fluid-font(3vh, 36px, 42px, 38px);
+    }
+
+    .text--xxl {
+      @include media.fluid-font(3vh, 44px, 50px, 46px);
+    }
+
+    .text--xxxl {
+      @include media.fluid-font(3vh, 52px, 64px, 58px);
+    }
+  }
+
+  .text--title {
+    color: var(--secondary-color);
+    font-weight: 800;
+  }
+
+  .text--italic {
+    font-style: italic;
+  }
+
+  .text--700 {
+    font-weight: 700;
+  }
+
+  .text--error {
+    color: var(--error-color);
+  }
 }
-
-

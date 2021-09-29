@@ -4,62 +4,90 @@
 
 html {
   body {
-    overflow: hidden;
     @include components.modalOverlay;
+    overflow: hidden;
 
     .wrapper {
-      @include components.modalPlayer;
-      position: relative;
+      @include components.modalCardsExchange;
 
-
-      .section--game_turn {
-        @include mixins.flex(1);
+      .section--header,
+      .section--form {
+        @include mixins.flex(1, 5, 10%);
       }
 
       .section--game_scores {
-        @include mixins.flex(4);
+        @include mixins.flex(1, 3, max-content);
+        margin: 0;
         width: 100%;
 
-        .container--scores {  
+        .container--scores {
           @include mixins.flexRow();
-          @include mixins.flex(1);
+          @include mixins.flex-wrap(wrap);
+          height: 100%;
           width: 100%;
 
-          @include media.media('landscape-max-h414') {
-            @include mixins.flex-wrap(nowrap);
-          }
-          @include media.media('portrait', '>=s-phone') {
-            @include mixins.flex-wrap(wrap);
-          }
           .score {
-            @include mixins.flex-grow(1);
             @include mixins.flexCol(center);
-            margin: 1em;
-            background: url("/static/images/scoreBackground.png") no-repeat center/contain;
-            height: 100%;
-            width: 100%;
-            max-width: 18vw;
+            background: url("/static/images/scoreBackground.png") no-repeat
+              center/contain;
+            padding: 2rem;
+            margin: 0.5vh 0;
 
-            @include media.media('portrait', '>=s-phone') {
-              height: 35%;
-              width: 100%;
-              max-width: 30vw;
+            @include media.query("portrait", ">=414px") {
+              padding: 3rem;
+            }
+
+            @include media.query("landscape", ">=tablet") {
+              padding: 3rem;
             }
           }
         }
       }
 
-      .section--footer {
-        @include mixins.flex(1);
+      .section--content {
+        @include mixins.flex(3, 0, max-content);
 
-        .container--form {
-          .form {
-            @include components.button;
+        @include media.query("landscape-max-h600") {
+          display: none;
+        }
 
-            .form__submit {
-              margin-top: 0;
+        @include media.query("portrait", "<414px") {
+          display: none;
+        }
+
+        .container--content {
+          width: 100%;
+          height: 100%;
+          max-width: 90%;
+
+          .container--iframe {
+            height: 100%;
+            width: 100%;
+
+            iframe {
+              height: 100%;
+              width: 100%;
+              min-height: 300px;
             }
-          } 
+
+            @include media.query("portrait", ">m-phone") {
+              min-height: 300px;
+            }
+          }
+        }
+      }
+      #modalCardExchange {
+        min-height: 35%;
+        padding: 1vh 1vw;
+
+        .modal__body {
+          .modal__player--cards {
+            .form {
+              .modal__player--cards--form {
+                margin: 1vh 0;
+              }
+            }
+          }
         }
       }
     }

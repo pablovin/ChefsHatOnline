@@ -364,7 +364,7 @@ def startGame(request):
                "actionDone": False, "actionSelected":[]}
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((settings.HOST, settings.PORT))
+        s.connect((settings.ICUB_HOST, settings.ICUB_PORT))
         s.sendall("START_GAME")
 
     return render(request, 'SingleGame/game.html', context)

@@ -34,3 +34,44 @@ class DataSet(models.Model):
     performanceScore = ArrayField(models.FloatField(blank=True),  default=list)
 
 # Create your models here.
+
+class MemoryObservations(models.Model):
+    experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE)
+    player  =  models.CharField(default="", max_length=300)
+    state = ArrayField(models.FloatField(blank=True), default=list)
+    action =  models.CharField(default="", max_length=4)
+    reward = models.CharField(max_length=300, default ="")
+    next_state = ArrayField(models.FloatField(blank=True), default=list)
+    done = models.CharField(max_length=300, default ="")
+    possibleActions = ArrayField(models.IntegerField(blank=True), default=list)
+    new_possibleActions = ArrayField(models.IntegerField(blank=True), default=list)
+
+
+class AgentCompetitiveness(models.Model):
+    experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE)
+    player = models.CharField(default="", max_length=300)
+    myCompetitiveness = models.FloatField(blank=True)
+    match = models.CharField(default="", max_length=10)
+    round = models.CharField(default="", max_length=10)
+
+
+class HumanObservation(models.Model):
+    experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE)
+    player = models.CharField(default="", max_length=300)
+    observationHuman = ArrayField(models.FloatField(blank=True), default=list)
+    match = models.CharField(default="", max_length=10)
+    round = models.CharField(default="", max_length=10)
+
+class selfObservation(models.Model):
+    experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE)
+    player = models.CharField(default="", max_length=300)
+    observation = ArrayField(models.FloatField(blank=True), default=list)
+    match = models.CharField(default="", max_length=10)
+    round = models.CharField(default="", max_length=10)
+
+class RivalryAgainstHuman(models.Model):
+    experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE)
+    player = models.CharField(default="", max_length=300)
+    rivalry = models.CharField(max_length=300, default ="")
+    match = models.CharField(default="", max_length=10)
+    round = models.CharField(default="", max_length=10)
