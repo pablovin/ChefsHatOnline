@@ -363,9 +363,13 @@ def startGame(request):
                "avatars":avatars, "hasAvatarRole":hasAvatarRole, "avatarRoles":avatarRoles, "player0CardsLength": player0CardsLength,
                "actionDone": False, "actionSelected":[]}
 
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((settings.ICUB_HOST, settings.ICUB_PORT))
-        s.sendall("START_GAME")
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
+
+    sock.sendto(b"START_GAME", (settings.ICUB_HOST, settings.ICUB_PORT))
+
+    # with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    #     s.connect((settings.ICUB_HOST, settings.ICUB_PORT))
+    #     s.sendall("START_GAME")
 
     return render(request, 'SingleGame/game.html', context)
 
@@ -858,9 +862,14 @@ def doAction(request):
                "actionDone": actionDone, "actionSelected":discardedCardsList
                }
 
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((settings.ICUB_HOST, settings.ICUB_PORT))
-        s.sendall(agentNames[player]+str(pizza))
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
+
+    sock.sendto(str.encode(agentNames[player]+str(pizza)), (settings.ICUB_HOST, settings.ICUB_PORT))
+
+    #
+    # with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    #     s.connect((settings.ICUB_HOST, settings.ICUB_PORT))
+    #     s.sendall(agentNames[player]+str(pizza))
 
 
     return render(request, 'SingleGame/game.html', context)
