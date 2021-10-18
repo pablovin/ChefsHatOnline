@@ -4,6 +4,17 @@ Webserver for the Chef's Hat Card Game.
 
 Visit [Chef's Hat Card Game original repository](https://github.com/pablovin/ChefsHatGYM) for more information.
 
+
+## Docker container 
+
+This app is available as a Docker container found here: https://www.docker.com/pablovin/chefshatonline 
+
+
+
+
+
+## Pre-requisites
+
 | Dependencies | Version |
 | ------------ | ------- |
 | Python | [3.x](https://www.python.org/downloads/) |
@@ -12,7 +23,6 @@ Visit [Chef's Hat Card Game original repository](https://github.com/pablovin/Che
 
 ----------
 
-## Pre-requisites
 
 ## PostgresSQL
 
@@ -25,7 +35,7 @@ sudo apt install libpq-dev
 
 create a database and user
 ```sh
-sudo su - postgres psql
+sudo -u postgres psql
 create database dbName;
 create user userName with password 'password';
 ```
