@@ -7,7 +7,7 @@ Visit [Chef's Hat Card Game original repository](https://github.com/pablovin/Che
 
 ## Docker container 
 
-This app is available as a Docker container found here: https://www.docker.com/pablovin/chefshatonline 
+This app is available as a Docker container found here: https://hub.docker.com/repository/docker/pablovin/chefshatonline
 
 
 
